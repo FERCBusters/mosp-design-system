@@ -733,9 +733,23 @@ body.keen-sticky-disabled .keen-sticky-topblock {
 }
 
 .graph {
-  height: 560px;
+  /* Let graph containers grow with their SVG height so the page can scroll */
+  height: auto;
   min-height: 380px;
   position: relative;
+}
+
+/* A taller default for large D3 graphs (bipartite, dense trees, etc.) */
+.graph.graph-tall {
+  min-height: 620px;
+}
+
+/* Prevent link strokes showing through labels */
+.graph svg text {
+  paint-order: stroke;
+  stroke: var(--bs-body-bg);
+  stroke-width: 4px;
+  stroke-linejoin: round;
 }
 
 .visual-controls {
