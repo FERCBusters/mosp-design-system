@@ -1,0 +1,20 @@
+{
+  "name": "@mydex/mosp-design-system",
+  "version": "0.1.0",
+  "description": "Shared UI shell + helpers (Bootstrap + D3-friendly) standardised across Mydex Open Source Projects.",
+  "type": "module",
+  "main": "./dist/app.js",
+  "module": "./dist/app.js",
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE",
+    "scripts"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "prepack": "npm run build"
+  }
+}
