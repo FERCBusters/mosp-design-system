@@ -765,3 +765,121 @@ body.keen-sticky-disabled .keen-sticky-topblock {
 .visual-controls .form-label {
   margin-bottom: 4px;
 }
+
+/* -------------------------------------------------------------------------
+   Capability / taxonomy "pill" browser (shared across apps)
+   ------------------------------------------------------------------------- */
+
+.tree-expander-spacer {
+  display: inline-block;
+  width: 14px;
+}
+
+.capability-tree-root summary label,
+.capability-tree-root li label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.capability-tree-root ul {
+  list-style: none;
+  margin: 4px 0 4px 18px;
+  padding: 0;
+}
+
+.capability-pills-browser {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel-2);
+  padding: 10px;
+  max-height: 520px;
+  overflow: auto;
+}
+
+.cap-tree-node {
+  margin: 2px 0;
+}
+
+.cap-node-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.cap-tree-node-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cap-tree-meta {
+  margin-left: 2px;
+  opacity: 0.75;
+}
+
+.cap-toggle {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bs-body-bg, #fff);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-700);
+}
+
+.cap-toggle:hover {
+  border-color: var(--accent-500);
+}
+
+.cap-children {
+  margin-left: 22px;
+  padding-left: 10px;
+  border-left: 1px dashed rgba(111, 60, 195, 0.25);
+}
+
+.capability-pill {
+  /* JS sets --cap-color per pill */
+  --cap-color: var(--cap-color, var(--accent-500));
+  border: 1px solid color-mix(in srgb, var(--cap-color) 55%, var(--border));
+  border-radius: 999px;
+  padding: 6px 10px;
+  background: color-mix(in srgb, var(--cap-color) 10%, var(--bs-body-bg, #fff));
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.capability-pill:hover {
+  border-color: color-mix(in srgb, var(--cap-color) 75%, var(--border));
+  background: color-mix(in srgb, var(--cap-color) 16%, var(--bs-body-bg, #fff));
+}
+
+.capability-pill.selected {
+  border-color: color-mix(in srgb, var(--cap-color) 85%, var(--border));
+  background: color-mix(in srgb, var(--cap-color) 22%, var(--bs-body-bg, #fff));
+}
+
+.capability-pill .pill-label {
+  font-size: 13px;
+  line-height: 1.1;
+}
+
+.capability-pill .remove-x {
+  font-weight: 700;
+  opacity: 0.65;
+}
+
+.selected-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
