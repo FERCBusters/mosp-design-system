@@ -1968,6 +1968,13 @@ export function parseYmd(s) {
 }
 
 // Enforce an inclusive maximum span (in days). Returns possibly adjusted strings.
+function formatDisplayDateYmd(ymd) {
+  const raw = String(ymd || '').trim();
+  const m = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!m) return raw;
+  return `${m[3]}/${m[2]}/${m[1]}`;
+}
+
 export function enforceMaxDateRange(fromStr, toStr, maxDays = 365) {
   const from = parseYmd(fromStr);
   const to = parseYmd(toStr);
@@ -1983,7 +1990,7 @@ export function enforceMaxDateRange(fromStr, toStr, maxDays = 365) {
     from: nf,
     to: toStr || '',
     adjusted: true,
-    message: `Date range limited to ${maxDays} days. Adjusted from_date to ${nf}.`,
+    message: `Date range limited to a maximum of ${maxDays} days between the two selected dates. Adjusted From date to ${formatDisplayDateYmd(nf)}.`,
   };
 }
 
