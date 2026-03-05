@@ -75,7 +75,7 @@ const DEFAULT_CONFIG = {
   // { label, href, key, requireAny?: ['is_admin', 'can_audit_trail'], requireAll?: [] }
   // label/href MAY be functions (me, cfg) => string for role-aware nav.
   links: [
-    {key: 'controls', label: 'Controls', href: '/'},
+    {key: 'controls', label: 'Controls', href: '/?stay=1'},
     {key: 'events', label: 'Events', href: '/events.html'},
     {key: 'sources', label: 'Sources', href: '/sources.html'},
     {key: 'viz', label: 'Visualisations', href: '/visualisation.html'},
