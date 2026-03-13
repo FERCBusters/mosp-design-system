@@ -79,6 +79,7 @@ const DEFAULT_CONFIG = {
     {key: 'events', label: 'Events', href: '/events.html'},
     {key: 'sources', label: 'Sources', href: '/sources.html'},
     {key: 'viz', label: 'Visualisations', href: '/visualisation.html'},
+    {key: 'my_questions', label: 'My Questions', href: '/my-questions.html', requireAny: ['is_admin', 'can_question_events']},
     {key: 'diary', label: 'Diary', href: '/admin.html#diary', requireAny: ['is_admin']},
     {key: 'admin', label: (me) => (me?.is_admin ? 'Admin' : 'Audit'), href: (me) => (me?.is_admin ? '/admin.html' : '/admin.html#audit'), requireAny: ['is_admin', 'can_audit_trail']},
   ],
@@ -115,13 +116,13 @@ const DEFAULT_CONFIG = {
   // Notification bell with badge (optional)
   bell: {
     enabled: true,
-    href: {admin: '/admin/questions.html', user: '/my-questions.html'},
+    href: '/questions.html',
     title: 'Questions',
     // If provided, initNavbar will poll this endpoint for a count.
     // May be string | function(me,cfg) | {admin, user}.
     summaryEndpoint: {admin: '/api/v1/admin/questions/summary', user: '/api/v1/me/questions/summary'},
     // May be string | function(me,cfg) | {admin, user}.
-    countKey: {admin: 'open_count', user: 'unread_replies_count'},
+    countKey: {admin: 'open_count', user: 'unread_count'},
     // WebSocket url (same-origin) for realtime, optional:
     wsUrl: '',
     // message handler: expects JSON messages with {type, count}
@@ -151,6 +152,11 @@ const DEFAULT_CONFIG = {
   storage: {
     themeKey: 'keen_theme',
     frameworkKey: 'keen_framework',
+  },
+  uiPreferences: {
+    endpoint: '',
+    method: 'PATCH',
+    stickyField: 'sticky_enabled',
   },
   // Optional hook to adjust the returned `me` object (e.g. map shape across apps)
   mapMe: null,
@@ -337,6 +343,121 @@ function _syncUiPrefsFromMe(me, cfg) {
 
   if (hasSticky) setStickyEnabled(!!prefs.sticky_enabled, cfg);
   if (hasAuto) setAutoApplyEnabled(!!prefs.auto_apply_enabled, cfg);
+}
+
+function _collapseStorageKey(cfg, section) {
+  const raw = String(section?.dataset?.mospFilterSection || '').trim() || location.pathname;
+  return `${cfg.appId}:filters-collapsed:${raw}`;
+}
+
+function _setStickyCheckbox(enabled) {
+  const box = document.getElementById('prefSticky');
+  if (box instanceof HTMLInputElement) box.checked = !!enabled;
+}
+
+export async function persistStickyEnabled(enabled, cfgOverrides = null) {
+  const cfg = getUiConfig(cfgOverrides);
+  const pref = cfg.uiPreferences || {};
+  const endpoint = String(pref.endpoint || '').trim();
+  const stickyField = String(pref.stickyField || 'sticky_enabled').trim() || 'sticky_enabled';
+  const method = String(pref.method || 'PATCH').trim().toUpperCase();
+
+  setStickyEnabled(!!enabled, cfg);
+  _setStickyCheckbox(!!enabled);
+  try {
+    if (window.mospPreferences && typeof window.mospPreferences === 'object') {
+      window.mospPreferences.sticky_enabled = !!enabled;
+    }
+  } catch {}
+
+  if (!endpoint) return null;
+
+  const payload = {[stickyField]: !!enabled};
+  if (method === 'PUT') return apiPut(endpoint, payload, {}, cfg);
+  return apiPatch(endpoint, payload, {}, cfg);
+}
+
+function _setFilterCollapsed(section, body, toggle, collapsed) {
+  if (!section || !body) return;
+  section.classList.toggle('mosp-filter-collapsed', !!collapsed);
+  body.hidden = !!collapsed;
+  body.style.display = collapsed ? 'none' : '';
+  if (toggle) {
+    toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+    const label = toggle.querySelector('[data-mosp-filter-toggle-label]');
+    if (label) label.textContent = collapsed ? 'Show filters' : 'Hide filters';
+    const icon = toggle.querySelector('i.bi');
+    if (icon) {
+      icon.classList.toggle('bi-chevron-down', !!collapsed);
+      icon.classList.toggle('bi-chevron-up', !collapsed);
+    }
+  }
+}
+
+function _ensureFilterToggle(section, header) {
+  if (!header) return null;
+  let toggle = section.querySelector('[data-mosp-filter-toggle]');
+  if (toggle) return toggle;
+
+  toggle = document.createElement('button');
+  toggle.type = 'button';
+  toggle.className = 'btn btn-sm btn-outline-secondary';
+  toggle.setAttribute('data-mosp-filter-toggle', '1');
+  toggle.innerHTML = '<i class="bi bi-chevron-up" aria-hidden="true"></i><span data-mosp-filter-toggle-label>Hide filters</span>';
+
+  const maybeTitle = header.querySelector('.fw-bold, .fw-semibold, h2, h3, h4, h5, h6, span');
+  if (!header.classList.contains('d-flex')) {
+    header.classList.add('d-flex', 'align-items-center', 'justify-content-between', 'gap-2', 'flex-wrap');
+    if (maybeTitle && maybeTitle.parentElement === header) maybeTitle.classList.add('mb-0');
+  }
+  header.appendChild(toggle);
+  return toggle;
+}
+
+function _ensureFilterHeader(section) {
+  let header = section.querySelector(':scope > .card-header');
+  if (header) return header;
+
+  header = document.createElement('div');
+  header.className = 'card-header';
+  const title = String(section.dataset.mospFilterTitle || 'Filters').trim() || 'Filters';
+  header.innerHTML = `<div class="fw-bold">${esc(title)}</div>`;
+  section.insertBefore(header, section.firstChild);
+  return header;
+}
+
+export function initCollapsibleFilterSections(cfgOverrides = null) {
+  const cfg = getUiConfig(cfgOverrides);
+  const sections = Array.from(document.querySelectorAll('[data-mosp-filter-section]'));
+  if (!sections.length) return;
+
+  sections.forEach((section) => {
+    const header = _ensureFilterHeader(section);
+    const body = section.querySelector('[data-mosp-filter-body]') || section.querySelector(':scope > .card-body') || section.querySelector('form');
+    if (!body) return;
+
+    const toggle = _ensureFilterToggle(section, header);
+    const storageKey = _collapseStorageKey(cfg, section);
+    const initiallyCollapsed = (() => {
+      try { return localStorage.getItem(storageKey) === '1'; } catch { return false; }
+    })();
+    _setFilterCollapsed(section, body, toggle, initiallyCollapsed);
+
+    toggle?.addEventListener('click', async () => {
+      const nextCollapsed = !(section.classList.contains('mosp-filter-collapsed'));
+      _setFilterCollapsed(section, body, toggle, nextCollapsed);
+      try { localStorage.setItem(storageKey, nextCollapsed ? '1' : '0'); } catch {}
+
+      if (nextCollapsed && getStickyEnabled(cfg, true)) {
+        try {
+          await persistStickyEnabled(false, cfg);
+        } catch {
+          setStickyEnabled(false, cfg);
+          _setStickyCheckbox(false);
+        }
+      }
+    });
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -1311,6 +1432,9 @@ export async function initNavbar(cfgOverrides = null) {
 
   // Bell
   await _initBell(cfg, me);
+
+  // Collapsible filter sections
+  try { initCollapsibleFilterSections(cfg); } catch {}
 
   return me;
 }
