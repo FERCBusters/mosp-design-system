@@ -252,7 +252,7 @@ function _autoApplyKey(cfg) {
  * Returns whether sticky filter/chart containers should be enabled.
  * Stored as a local-only preference (not sent to the backend).
  */
-export function getStickyEnabled(cfgOverrides = null, fallback = true) {
+export function getStickyEnabled(cfgOverrides = null, fallback = false) {
   const cfg = getUiConfig(cfgOverrides);
   try {
     return _parseBool(localStorage.getItem(_stickyKey(cfg)), !!fallback);
@@ -284,7 +284,7 @@ export function setStickyEnabled(enabled, cfgOverrides = null) {
  */
 export function applyStickyPreference(cfgOverrides = null, early = false) {
   const cfg = getUiConfig(cfgOverrides);
-  const enabled = getStickyEnabled(cfg, true);
+  const enabled = getStickyEnabled(cfg, false);
   const cls = 'keen-sticky-disabled';
 
   const apply = () => {
@@ -448,7 +448,95 @@ export function initCollapsibleFilterSections(cfgOverrides = null) {
       _setFilterCollapsed(section, body, toggle, nextCollapsed);
       try { localStorage.setItem(storageKey, nextCollapsed ? '1' : '0'); } catch {}
 
-      if (nextCollapsed && getStickyEnabled(cfg, true)) {
+      if (nextCollapsed && getStickyEnabled(cfg, false)) {
+        try {
+          await persistStickyEnabled(false, cfg);
+        } catch {
+          setStickyEnabled(false, cfg);
+          _setStickyCheckbox(false);
+        }
+      }
+    });
+  });
+}
+
+function _vizCollapseStorageKey(cfg, section) {
+  const raw = String(section?.dataset?.mospVizSection || '').trim() || location.pathname;
+  return `${cfg.appId}:viz-collapsed:${raw}`;
+}
+
+function _setVizCollapsed(section, body, toggle, collapsed) {
+  if (!section || !body) return;
+  section.classList.toggle('mosp-viz-collapsed', !!collapsed);
+  body.hidden = !!collapsed;
+  body.style.display = collapsed ? 'none' : '';
+  if (toggle) {
+    toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+    const label = toggle.querySelector('[data-mosp-viz-toggle-label]');
+    if (label) label.textContent = collapsed ? 'Show visualisation' : 'Hide visualisation';
+    const icon = toggle.querySelector('i.bi');
+    if (icon) {
+      icon.classList.toggle('bi-chevron-down', !!collapsed);
+      icon.classList.toggle('bi-chevron-up', !collapsed);
+    }
+  }
+}
+
+function _ensureVizToggle(section, header) {
+  if (!header) return null;
+  let toggle = section.querySelector('[data-mosp-viz-toggle]');
+  if (toggle) return toggle;
+
+  toggle = document.createElement('button');
+  toggle.type = 'button';
+  toggle.className = 'btn btn-sm btn-outline-secondary';
+  toggle.setAttribute('data-mosp-viz-toggle', '1');
+  toggle.innerHTML = '<i class="bi bi-chevron-up" aria-hidden="true"></i><span data-mosp-viz-toggle-label>Hide visualisation</span>';
+
+  const maybeTitle = header.querySelector('.fw-bold, .fw-semibold, h2, h3, h4, h5, h6, span');
+  if (!header.classList.contains('d-flex')) {
+    header.classList.add('d-flex', 'align-items-center', 'justify-content-between', 'gap-2', 'flex-wrap');
+    if (maybeTitle && maybeTitle.parentElement === header) maybeTitle.classList.add('mb-0');
+  }
+  header.appendChild(toggle);
+  return toggle;
+}
+
+function _ensureVizHeader(section) {
+  let header = section.querySelector(':scope > .card-header');
+  if (header) return header;
+
+  header = document.createElement('div');
+  header.className = 'card-header';
+  const title = String(section.dataset.mospVizTitle || 'Visualisation').trim() || 'Visualisation';
+  header.innerHTML = `<div class="fw-bold">${esc(title)}</div>`;
+  section.insertBefore(header, section.firstChild);
+  return header;
+}
+
+export function initCollapsibleVisualisationSections(cfgOverrides = null) {
+  const cfg = getUiConfig(cfgOverrides);
+  const sections = Array.from(document.querySelectorAll('[data-mosp-viz-section]'));
+  if (!sections.length) return;
+
+  sections.forEach((section) => {
+    const header = _ensureVizHeader(section);
+    const body = section.querySelector('[data-mosp-viz-body]') || section.querySelector(':scope > .card-body') || section.querySelector('[role="img"]') || section.querySelector('svg') || section.querySelector('canvas');
+    if (!body) return;
+
+    const toggle = _ensureVizToggle(section, header);
+    const storageKey = _vizCollapseStorageKey(cfg, section);
+    const initiallyCollapsed = (() => {
+      try { return localStorage.getItem(storageKey) === '1'; } catch { return false; }
+    })();
+    _setVizCollapsed(section, body, toggle, initiallyCollapsed);
+
+    toggle?.addEventListener('click', async () => {
+      const nextCollapsed = !(section.classList.contains('mosp-viz-collapsed'));
+      _setVizCollapsed(section, body, toggle, nextCollapsed);
+      try { localStorage.setItem(storageKey, nextCollapsed ? '1' : '0'); } catch {}
+
+      if (nextCollapsed && getStickyEnabled(cfg, false)) {
         try {
           await persistStickyEnabled(false, cfg);
         } catch {
@@ -1433,8 +1521,9 @@ export async function initNavbar(cfgOverrides = null) {
   // Bell
   await _initBell(cfg, me);
 
-  // Collapsible filter sections
+  // Collapsible filter/visualisation sections
   try { initCollapsibleFilterSections(cfg); } catch {}
+  try { initCollapsibleVisualisationSections(cfg); } catch {}
 
   return me;
 }

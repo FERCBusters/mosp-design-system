@@ -925,16 +925,19 @@ body.keen-sticky-disabled .keen-sticky-topblock {
   margin-bottom: 8px;
 }
 
-[data-mosp-filter-toggle] {
+[data-mosp-filter-toggle],
+[data-mosp-viz-toggle] {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
 }
 
-[data-mosp-filter-section].mosp-filter-collapsed {
+[data-mosp-filter-section].mosp-filter-collapsed,
+[data-mosp-viz-section].mosp-viz-collapsed {
   box-shadow: 0 8px 20px rgba(20, 20, 40, 0.04);
 }
 
-[data-mosp-filter-section].mosp-filter-collapsed > .card-header {
+[data-mosp-filter-section].mosp-filter-collapsed > .card-header,
+[data-mosp-viz-section].mosp-viz-collapsed > .card-header {
   border-bottom: 0;
 }
