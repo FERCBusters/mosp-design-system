@@ -941,3 +941,33 @@ body.keen-sticky-disabled .keen-sticky-topblock {
 [data-mosp-viz-section].mosp-viz-collapsed > .card-header {
   border-bottom: 0;
 }
+
+
+.viz-zoom-controls {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 6;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
+}
+.viz-zoom-btn {
+  appearance: none;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  background: #fff;
+  color: inherit;
+  min-width: 1.9rem;
+  height: 1.9rem;
+  padding: 0 0.45rem;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  line-height: 1;
+}
+.viz-zoom-btn:hover { background: rgba(15, 23, 42, 0.05); }
+.viz-zoom-btn-reset { min-width: auto; font-size: 0.78rem; }

@@ -2191,20 +2191,53 @@ function formatDisplayDateYmd(ymd) {
 export function enforceMaxDateRange(fromStr, toStr, maxDays = 365) {
   const from = parseYmd(fromStr);
   const to = parseYmd(toStr);
-  if (!from || !to) return {from: fromStr || '', to: toStr || '', adjusted: false, message: ''};
+  if (!from || !to) return {from: fromStr || '', to: toStr || '', adjusted: false, exceeded: false, message: ''};
   const msPerDay = 86400000;
   const spanDays = Math.floor((to.getTime() - from.getTime()) / msPerDay);
   if (!Number.isFinite(spanDays) || spanDays <= maxDays) {
-    return {from: fromStr || '', to: toStr || '', adjusted: false, message: ''};
+    return {from: fromStr || '', to: toStr || '', adjusted: false, exceeded: false, message: ''};
   }
-  const newFrom = new Date(to.getTime() - (maxDays * msPerDay));
-  const nf = isoYmd(newFrom);
+  const latestAllowedFrom = new Date(to.getTime() - (maxDays * msPerDay));
   return {
-    from: nf,
+    from: fromStr || '',
     to: toStr || '',
-    adjusted: true,
-    message: `Date range limited to a maximum of ${maxDays} days between the two selected dates. Adjusted From date to ${formatDisplayDateYmd(nf)}.`,
+    adjusted: false,
+    exceeded: true,
+    latestAllowedFrom: isoYmd(latestAllowedFrom),
+    message: `Date range cannot exceed ${maxDays} days. Choose a From date on or after ${formatDisplayDateYmd(isoYmd(latestAllowedFrom))}.`,
   };
+}
+
+export function attachDateRangeBounds(fromInput, toInput, maxDays = 365) {
+  const syncBounds = () => {
+    const from = parseYmd(fromInput?.value || '');
+    const to = parseYmd(toInput?.value || '');
+    const msPerDay = 86400000;
+    if (fromInput && to) {
+      const maxTo = new Date(from.getTime() + (maxDays * msPerDay));
+      fromInput.max = toInput.value || fromInput.max || '';
+      toInput.min = fromInput.value || toInput.min || '';
+      toInput.max = isoYmd(maxTo);
+    } else if (toInput) {
+      toInput.removeAttribute('min');
+      toInput.removeAttribute('max');
+    }
+    if (toInput && from) {
+      const minFrom = new Date(from.getTime() - (maxDays * msPerDay));
+      toInput.min = fromInput?.value || toInput.min || '';
+      fromInput.min = isoYmd(minFrom);
+      fromInput.max = toInput.value || fromInput.max || '';
+    } else if (fromInput) {
+      fromInput.removeAttribute('max');
+    }
+  };
+  [fromInput, toInput].forEach((input) => {
+    if (!input || input.__keenDateBoundsAttached) return;
+    input.__keenDateBoundsAttached = true;
+    input.addEventListener('change', syncBounds);
+    input.addEventListener('blur', syncBounds);
+  });
+  syncBounds();
 }
 
 // ---------------------------------------------------------------------------
