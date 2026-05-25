@@ -6,6 +6,7 @@
   --keen-accent-700: #6a3fb2;
   --keen-accent-100: #f2ecfb;
   --keen-accent-rgb: 126,87,194;
+  --keen-accent-contrast: #fff;
   --keen-link-hover: #55308f;
 
   /* Chart palette (defaults to accent) */
@@ -41,6 +42,7 @@
   --keen-accent-700: #6a3fb2;
   --keen-accent-100: #f2ecfb;
   --keen-accent-rgb: 126,87,194;
+  --keen-accent-contrast: #fff;
   --keen-link-hover: #55308f;
   --bs-body-bg: #f7f4fb;
 }
@@ -50,6 +52,7 @@
   --keen-accent-700: #1d4ed8;
   --keen-accent-100: #e8f0ff;
   --keen-accent-rgb: 37,99,235;
+  --keen-accent-contrast: #fff;
   --keen-link-hover: #1e40af;
   --bs-body-bg: #f4f8ff;
 }
@@ -59,6 +62,7 @@
   --keen-accent-700: #15803d;
   --keen-accent-100: #eaf7ef;
   --keen-accent-rgb: 22,163,74;
+  --keen-accent-contrast: #fff;
   --keen-link-hover: #166534;
   --bs-body-bg: #f3fbf6;
 }
@@ -68,6 +72,7 @@
   --keen-accent-700: #ea580c;
   --keen-accent-100: #fff1e6;
   --keen-accent-rgb: 249,115,22;
+  --keen-accent-contrast: #111827;
   --keen-link-hover: #c2410c;
   --bs-body-bg: #fff7f2;
 }
@@ -77,6 +82,7 @@
   --keen-accent-700: #be185d;
   --keen-accent-100: #ffeaf3;
   --keen-accent-rgb: 219,39,119;
+  --keen-accent-contrast: #fff;
   --keen-link-hover: #9d174d;
   --bs-body-bg: #fff5fa;
 }
@@ -86,6 +92,7 @@
   --keen-accent-700: #334155;
   --keen-accent-100: #eef2f6;
   --keen-accent-rgb: 71,85,105;
+  --keen-accent-contrast: #fff;
   --keen-link-hover: #1f2937;
   --bs-body-bg: #f6f8fb;
 }
@@ -95,6 +102,7 @@
   --keen-accent-700: #0f5b55;
   --keen-accent-100: #e6f6f4;
   --keen-accent-rgb: 15,118,110;
+  --keen-accent-contrast: #fff;
   --keen-link-hover: #134e4a;
   --bs-body-bg: #f3fbfa;
 }
@@ -143,6 +151,136 @@ body.print-view .no-print {
   width: auto;
   filter: brightness(0) invert(1) drop-shadow(0 1px 1px rgba(0,0,0,0.35));
   opacity: 0.95;
+}
+
+.navbar-keen .container-fluid { gap: 0.25rem; }
+.navbar-keen .navbar-brand {
+  margin-right: 0.75rem;
+  white-space: nowrap;
+}
+.navbar-keen .navbar-nav { min-width: 0; }
+.navbar-keen .nav-link {
+  padding-left: 0.55rem;
+  padding-right: 0.55rem;
+}
+.navbar-keen .navbar-brand,
+.navbar-keen .nav-link,
+.navbar-keen .btn,
+.navbar-keen .form-select {
+  white-space: nowrap;
+}
+.navbar-keen .navbar-brand { font-size: 0.95rem; }
+.navbar-keen .nav-link { font-size: 0.9rem; }
+.navbar-keen .btn,
+.navbar-keen .form-select { font-size: 0.875rem; }
+.navbar-keen.nav-density-compact .navbar-brand {
+  font-size: 0.88rem;
+  margin-right: 0.45rem;
+}
+.navbar-keen.nav-density-compact .keen-brand-icon {
+  height: 24px;
+}
+.navbar-keen.nav-density-compact .nav-link {
+  font-size: 0.82rem;
+  padding-left: 0.38rem;
+  padding-right: 0.38rem;
+}
+.navbar-keen.nav-density-compact .btn,
+.navbar-keen.nav-density-compact .form-select {
+  font-size: 0.8rem;
+  padding-left: 0.45rem;
+  padding-right: 0.45rem;
+}
+.navbar-keen.nav-density-compact .mosp-nav-framework {
+  gap: 0.3rem !important;
+  margin-right: 0.35rem !important;
+}
+.navbar-keen.nav-density-tight .navbar-brand {
+  font-size: 0.82rem;
+  margin-right: 0.25rem;
+}
+.navbar-keen.nav-density-tight .keen-brand-icon {
+  height: 22px;
+}
+.navbar-keen.nav-density-tight .nav-link {
+  font-size: 0.76rem;
+  padding-left: 0.28rem;
+  padding-right: 0.28rem;
+}
+.navbar-keen.nav-density-tight .btn,
+.navbar-keen.nav-density-tight .form-select {
+  font-size: 0.74rem;
+  padding-left: 0.35rem;
+  padding-right: 0.35rem;
+}
+.navbar-keen.nav-density-tight .mosp-nav-framework-label,
+.navbar-keen.nav-density-tight .nav-label-optional { display: none; }
+.navbar-keen.nav-density-tight .mosp-nav-framework-select {
+  width: min(var(--mosp-fw-select-ch, 14ch), 16ch);
+}
+.navbar-keen.nav-density-tight .mosp-nav-actions > *,
+.navbar-keen.nav-density-tight .mosp-nav-search,
+.navbar-keen.nav-density-tight .mosp-nav-framework {
+  margin-right: 0.25rem !important;
+}
+.navbar-keen.nav-density-overflow .navbar-brand span {
+  max-width: 5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.navbar-keen .mosp-nav-framework,
+.navbar-keen .mosp-nav-actions {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+.navbar-keen .mosp-nav-framework-select {
+  width: var(--mosp-fw-select-ch, 16ch);
+  min-width: 0;
+  max-width: min(20rem, 45vw);
+}
+.navbar-keen .mosp-nav-search {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+.navbar-keen .mosp-nav-search-button {
+  min-width: 2.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.mosp-search-modal .mosp-nav-search-input {
+  width: 100%;
+}
+.navbar-keen .mosp-nav-actions {
+  white-space: nowrap;
+}
+@media (max-width: 1399.98px) {
+  .navbar-keen .navbar-collapse { padding-top: 0.75rem; }
+  .navbar-keen .navbar-brand span {
+    max-width: 8rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .navbar-keen .mosp-nav-framework,
+  .navbar-keen .mosp-nav-search,
+  .navbar-keen .mosp-nav-actions {
+    margin-top: 0.5rem;
+  }
+  .navbar-keen .mosp-nav-framework-label { display: none; }
+  .navbar-keen .mosp-nav-framework-select {
+    max-width: min(20rem, 100%);
+  }
+  .navbar-keen .mosp-nav-search {
+    width: auto;
+    max-width: none;
+    min-width: 0;
+  }
+  .navbar-keen .mosp-nav-actions {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    white-space: normal;
+  }
+  .navbar-keen .mosp-nav-actions > * { margin-right: 0 !important; }
 }
 
 .container-tight { max-width: 1400px; }
@@ -268,9 +406,39 @@ body.print-view .no-print {
 a.link-subtle { color: rgba(31,31,42,0.75); text-decoration: none; }
 a.link-subtle:hover { color: rgba(31,31,42,0.95); text-decoration: underline; }
 
-.btn-outline-primary {
-  border-color: rgba(var(--keen-accent-rgb),0.55);
+/* Make Bootstrap primary buttons follow the active KEEN theme palette.
+   Bootstrap's compiled .btn-primary ships with static button variables, so
+   overriding --bs-primary alone is not enough. */
+.btn-primary {
+  --bs-btn-color: var(--keen-accent-contrast);
+  --bs-btn-bg: var(--keen-accent);
+  --bs-btn-border-color: var(--keen-accent);
+  --bs-btn-hover-color: var(--keen-accent-contrast);
+  --bs-btn-hover-bg: var(--keen-accent-700);
+  --bs-btn-hover-border-color: var(--keen-accent-700);
+  --bs-btn-focus-shadow-rgb: var(--keen-accent-rgb);
+  --bs-btn-active-color: var(--keen-accent-contrast);
+  --bs-btn-active-bg: var(--keen-accent-700);
+  --bs-btn-active-border-color: var(--keen-accent-700);
+  --bs-btn-disabled-color: var(--keen-accent-contrast);
+  --bs-btn-disabled-bg: var(--keen-accent);
+  --bs-btn-disabled-border-color: var(--keen-accent);
 }
+
+.btn-outline-primary {
+  --bs-btn-color: var(--keen-accent-700);
+  --bs-btn-border-color: rgba(var(--keen-accent-rgb),0.55);
+  --bs-btn-hover-color: var(--keen-accent-contrast);
+  --bs-btn-hover-bg: var(--keen-accent);
+  --bs-btn-hover-border-color: var(--keen-accent);
+  --bs-btn-focus-shadow-rgb: var(--keen-accent-rgb);
+  --bs-btn-active-color: var(--keen-accent-contrast);
+  --bs-btn-active-bg: var(--keen-accent-700);
+  --bs-btn-active-border-color: var(--keen-accent-700);
+  --bs-btn-disabled-color: var(--keen-accent-700);
+  --bs-btn-disabled-border-color: rgba(var(--keen-accent-rgb),0.35);
+}
+
 .btn-outline-primary:hover {
   border-color: rgba(var(--keen-accent-rgb),0.75);
 }
@@ -493,8 +661,8 @@ pre.pretty {
 
 /* Sortable tables */
 th.sortable { cursor: pointer; user-select: none; }
-th.sortable.sort-asc::after { content: " ▲"; opacity: 0.55; font-size: 0.85em; }
-th.sortable.sort-desc::after { content: " ▼"; opacity: 0.55; font-size: 0.85em; }
+th.sortable.sort-asc::after { content: " \2191"; opacity: 0.65; font-size: 0.9em; }
+th.sortable.sort-desc::after { content: " \2193"; opacity: 0.65; font-size: 0.9em; }
 
 .mapping-rationale {
   white-space: pre-wrap;
@@ -971,3 +1139,5 @@ body.keen-sticky-disabled .keen-sticky-topblock {
 }
 .viz-zoom-btn:hover { background: rgba(15, 23, 42, 0.05); }
 .viz-zoom-btn-reset { min-width: auto; font-size: 0.78rem; }
+
+

@@ -16,6 +16,35 @@ export function esc(s) {
 
 // Validate a URL before placing it into an href.
 // Defense-in-depth against click-based XSS via `javascript:` URLs.
+
+
+export const UI_LABELS = Object.freeze({
+  expand: 'Expand',
+  collapse: 'Collapse',
+});
+
+export const EXPAND_LABEL = UI_LABELS.expand;
+export const COLLAPSE_LABEL = UI_LABELS.collapse;
+
+export function expandCollapseLabelHtml() {
+  return `<span class="when-expanded">${esc(COLLAPSE_LABEL)}</span><span class="when-collapsed">${esc(EXPAND_LABEL)}</span>`;
+}
+
+export function collapseToggleButtonHtml({
+  targetId = '',
+  expanded = true,
+  className = 'btn btn-sm btn-outline-secondary',
+  controlsLabel = '',
+} = {}) {
+  const safeId = String(targetId || '').replace(/[^A-Za-z0-9_-]/g, '-');
+  if (!safeId) return '';
+  const isExpanded = expanded !== false;
+  const labelTarget = controlsLabel ? ` ${String(controlsLabel)}` : '';
+  const collapsedClass = isExpanded ? '' : ' collapsed';
+  const ariaLabel = `${isExpanded ? COLLAPSE_LABEL : EXPAND_LABEL}${labelTarget}`.trim();
+  return `<button class="${esc(className)}${collapsedClass}" type="button" data-bs-toggle="collapse" data-bs-target="#${esc(safeId)}" aria-expanded="${isExpanded ? 'true' : 'false'}" aria-controls="${esc(safeId)}" aria-label="${esc(ariaLabel)}">${expandCollapseLabelHtml()}</button>`;
+}
+
 export function safeExternalHref(url) {
   const raw = String(url ?? '').trim();
   if (!raw) return '';
@@ -70,17 +99,20 @@ const DEFAULT_CONFIG = {
   appId: 'keen',
   appName: 'Keen',
   brandIcon: '/keen.svg',
-  brandHref: '/',
+  brandHref: '/index.html',
   // Navigation links. Each entry:
   // { label, href, key, requireAny?: ['is_admin', 'can_audit_trail'], requireAll?: [] }
   // label/href MAY be functions (me, cfg) => string for role-aware nav.
   links: [
-    {key: 'controls', label: 'Controls', href: '/?stay=1'},
+    {key: 'home', label: 'Home', href: '/index.html'},
+    {key: 'controls', label: 'Controls', href: '/controls.html'},
+    {key: 'clauses', label: 'Clauses', href: '/clauses.html'},
     {key: 'events', label: 'Events', href: '/events.html'},
     {key: 'sources', label: 'Sources', href: '/sources.html'},
-    {key: 'viz', label: 'Visualisations', href: '/visualisation.html'},
-    {key: 'my_questions', label: 'My Questions', href: '/my-questions.html', requireAny: ['is_admin', 'can_question_events']},
-    {key: 'diary', label: 'Diary', href: '/admin.html#diary', requireAny: ['is_admin']},
+    {key: 'viz', label: 'Visuals', href: '/visualisation.html'},
+    {key: 'risks', label: 'Risks', href: '/risks.html', requireAny: ['is_admin', 'can_view_risks', 'can_manage_risks']},
+    {key: 'audits', label: 'Audits', href: '/audits.html', requireAny: ['is_admin', 'can_view_audits', 'can_manage_audits']},
+    {key: 'diary', label: 'Diary', href: '/events.html?source=diary', requireAny: ['is_admin']},
     {key: 'admin', label: (me) => (me?.is_admin ? 'Admin' : 'Audit'), href: (me) => (me?.is_admin ? '/admin.html' : '/admin.html#audit'), requireAny: ['is_admin', 'can_audit_trail']},
   ],
   // If true, nav links will automatically be augmented with ?framework=<slug>
@@ -90,7 +122,12 @@ const DEFAULT_CONFIG = {
     queryParam: 'framework',
     endpoint: '/api/v1/frameworks',
     default: '',
-    selectMinWidthPx: 220,
+    // Let the framework picker fit its contents without forcing a wide nav item.
+    selectMinChars: 12,
+    selectMaxChars: 26,
+    selectExtraChars: 4,
+    // Backwards compatibility: set this only when an app deliberately needs a fixed minimum.
+    selectMinWidthPx: 0,
   },
   // Global search box in navbar
   search: {
@@ -130,9 +167,11 @@ const DEFAULT_CONFIG = {
   },
   // Navbar extension points (rarely needed; use sparingly)
   nav: {
+    // Collapse the nav earlier so laptops/tablets get a hamburger instead of cramped controls.
+    expandClass: 'navbar-expand-xxl',
     // Optional HTML (string or function(me,cfg)=>string) injected into the right
     // side of the navbar, before shortcuts/bell/account/logout.
-    extraHtml: '',
+    extraHtml: (me) => ((me?.can_manage_audits || me?.is_admin) ? '<a class="btn btn-sm btn-success me-2" data-nav-fw="1" data-base-href="/audits.html?new=1" href="/audits.html?new=1"><i class="bi bi-clipboard2-plus me-1" aria-hidden="true"></i><span class="nav-label-optional">Start audit</span></a>' : ''),
   },
   // Auth / API
   apiBase: '', // optional prefix applied to *relative* API paths
@@ -385,7 +424,7 @@ function _setFilterCollapsed(section, body, toggle, collapsed) {
   if (toggle) {
     toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
     const label = toggle.querySelector('[data-mosp-filter-toggle-label]');
-    if (label) label.textContent = collapsed ? 'Show filters' : 'Hide filters';
+    if (label) label.textContent = collapsed ? EXPAND_LABEL : COLLAPSE_LABEL;
     const icon = toggle.querySelector('i.bi');
     if (icon) {
       icon.classList.toggle('bi-chevron-down', !!collapsed);
@@ -403,7 +442,7 @@ function _ensureFilterToggle(section, header) {
   toggle.type = 'button';
   toggle.className = 'btn btn-sm btn-outline-secondary';
   toggle.setAttribute('data-mosp-filter-toggle', '1');
-  toggle.innerHTML = '<i class="bi bi-chevron-up" aria-hidden="true"></i><span data-mosp-filter-toggle-label>Hide filters</span>';
+  toggle.innerHTML = `<i class="bi bi-chevron-up" aria-hidden="true"></i><span data-mosp-filter-toggle-label>${COLLAPSE_LABEL}</span>`;
 
   const maybeTitle = header.querySelector('.fw-bold, .fw-semibold, h2, h3, h4, h5, h6, span');
   if (!header.classList.contains('d-flex')) {
@@ -473,7 +512,7 @@ function _setVizCollapsed(section, body, toggle, collapsed) {
   if (toggle) {
     toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
     const label = toggle.querySelector('[data-mosp-viz-toggle-label]');
-    if (label) label.textContent = collapsed ? 'Show visualisation' : 'Hide visualisation';
+    if (label) label.textContent = collapsed ? EXPAND_LABEL : COLLAPSE_LABEL;
     const icon = toggle.querySelector('i.bi');
     if (icon) {
       icon.classList.toggle('bi-chevron-down', !!collapsed);
@@ -491,7 +530,7 @@ function _ensureVizToggle(section, header) {
   toggle.type = 'button';
   toggle.className = 'btn btn-sm btn-outline-secondary';
   toggle.setAttribute('data-mosp-viz-toggle', '1');
-  toggle.innerHTML = '<i class="bi bi-chevron-up" aria-hidden="true"></i><span data-mosp-viz-toggle-label>Hide visualisation</span>';
+  toggle.innerHTML = `<i class="bi bi-chevron-up" aria-hidden="true"></i><span data-mosp-viz-toggle-label>${COLLAPSE_LABEL}</span>`;
 
   const maybeTitle = header.querySelector('.fw-bold, .fw-semibold, h2, h3, h4, h5, h6, span');
   if (!header.classList.contains('d-flex')) {
@@ -898,6 +937,30 @@ async function _fetchFrameworks(cfg) {
   return _frameworkPromise;
 }
 
+function _sizeFrameworkSelector(sel, items, cfg) {
+  if (!sel) return;
+
+  const labels = ['Select…', 'None'];
+  for (const it of (Array.isArray(items) ? items : [])) {
+    labels.push(String(it?.name || it?.slug || '').trim());
+  }
+
+  const maxLabelLen = labels.reduce((max, label) => Math.max(max, [...String(label || '')].length), 0);
+  const minChars = Math.max(8, Number(cfg.framework.selectMinChars || 12));
+  const maxChars = Math.max(minChars, Number(cfg.framework.selectMaxChars || 26));
+  const extraChars = Math.max(2, Number(cfg.framework.selectExtraChars || 4));
+  const widthChars = Math.min(maxChars, Math.max(minChars, maxLabelLen + extraChars));
+
+  sel.style.setProperty('--mosp-fw-select-ch', `${widthChars}ch`);
+
+  const fixedMinPx = Number(cfg.framework.selectMinWidthPx || 0);
+  if (fixedMinPx > 0) {
+    sel.style.minWidth = `${fixedMinPx}px`;
+  } else {
+    sel.style.minWidth = '0';
+  }
+}
+
 async function _initFrameworkSelector(cfg) {
   const sel = document.getElementById('navFrameworkSelect');
   if (!sel) return;
@@ -918,6 +981,8 @@ async function _initFrameworkSelector(cfg) {
     opt.textContent = it.name || it.slug;
     sel.appendChild(opt);
   }
+
+  _sizeFrameworkSelector(sel, items, cfg);
 
   const current = getCurrentFramework(defaultSlug, cfg);
   if (current) sel.value = current;
@@ -1225,6 +1290,63 @@ function _resolveRoleVariant(v, me) {
   return v;
 }
 
+
+function _navElementOverflows(el) {
+  if (!el) return false;
+  return (el.scrollWidth || 0) > ((el.clientWidth || 0) + 2);
+}
+
+function _applyNavDensity(mount) {
+  const nav = mount?.querySelector?.('nav.navbar-keen');
+  if (!nav) return;
+
+  const container = nav.querySelector('.container-fluid');
+  const collapse = nav.querySelector('.navbar-collapse');
+  const collapseStyle = collapse ? window.getComputedStyle(collapse) : null;
+
+  nav.classList.remove('nav-density-compact', 'nav-density-tight', 'nav-density-overflow');
+
+  // When Bootstrap has collapsed the nav into the hamburger state, the layout is
+  // vertical rather than width-constrained. Let Bootstrap handle that mode.
+  if (collapseStyle && collapseStyle.display === 'none') return;
+
+  if (!_navElementOverflows(container) && !_navElementOverflows(collapse)) return;
+
+  nav.classList.add('nav-density-compact');
+  if (!_navElementOverflows(container) && !_navElementOverflows(collapse)) return;
+
+  nav.classList.add('nav-density-tight');
+  if (!_navElementOverflows(container) && !_navElementOverflows(collapse)) return;
+
+  nav.classList.add('nav-density-overflow');
+}
+
+function _initNavDensity(mount, onAfterApply = null) {
+  const run = () => {
+    _applyNavDensity(mount);
+    if (typeof onAfterApply === 'function') {
+      try { onAfterApply(); } catch { /* ignore layout callback errors */ }
+    }
+  };
+
+  requestAnimationFrame(run);
+  window.addEventListener('resize', run);
+
+  try {
+    const nav = mount?.querySelector?.('nav.navbar-keen');
+    if (nav && 'ResizeObserver' in window) {
+      const ro = new ResizeObserver(() => { requestAnimationFrame(run); });
+      ro.observe(nav);
+      const container = nav.querySelector('.container-fluid');
+      if (container) ro.observe(container);
+    }
+  } catch {
+    // ResizeObserver is progressive enhancement only.
+  }
+
+  return run;
+}
+
 export function renderNavbar(active = '', me = null, cfgOverrides = null) {
   const cfg = getUiConfig(cfgOverrides);
 
@@ -1246,26 +1368,56 @@ export function renderNavbar(active = '', me = null, cfgOverrides = null) {
   const logout = logoutEnabled ? `<button class="btn btn-sm btn-outline-light" id="navLogout" type="button">Logout</button>` : '';
 
   const frameworkBlock = cfg.framework.enabled ? `
-      <div class="d-flex align-items-center gap-2 me-2">
-        <label for="navFrameworkSelect" class="small text-light opacity-75 mb-0" style="white-space:nowrap;">${esc(cfg.framework.label || 'Framework')}</label>
-        <select id="navFrameworkSelect" class="form-select form-select-sm" style="min-width:${Number(cfg.framework.selectMinWidthPx || 220)}px;" disabled>
+      <div class="d-flex align-items-center gap-2 me-2 mosp-nav-framework">
+        <label for="navFrameworkSelect" class="small text-light opacity-75 mb-0 mosp-nav-framework-label" style="white-space:nowrap;">${esc(cfg.framework.label || '')}</label>
+        <select id="navFrameworkSelect" class="form-select form-select-sm mosp-nav-framework-select" disabled>
           <option>Loading…</option>
         </select>
       </div>
   ` : '';
 
+  const searchLabel = esc(cfg.search.label || 'Search');
+  const searchPlaceholder = esc(cfg.search.placeholder || 'Search');
+  const searchDatalist = cfg.search.datalistId ? `list="${esc(cfg.search.datalistId)}"` : '';
+  const searchDatalistHtml = cfg.search.datalistId ? `<datalist id="${esc(cfg.search.datalistId)}"></datalist>` : '';
   const searchBlock = cfg.search.enabled ? `
-      <form class="d-flex me-2" role="search" id="navSearchForm">
-        <input class="form-control form-control-sm me-2" id="navSearch" type="search" placeholder="${esc(cfg.search.placeholder || 'Search')}" aria-label="Search" ${cfg.search.datalistId ? `list="${esc(cfg.search.datalistId)}"` : ''}>
-        ${cfg.search.datalistId ? `<datalist id="${esc(cfg.search.datalistId)}"></datalist>` : ''}
-        <button class="btn btn-sm btn-light" type="submit">Search</button>
-      </form>
+      <div class="me-2 mosp-nav-search">
+        <button class="btn btn-sm btn-light mosp-nav-search-button" id="navSearchOpen" type="button" data-bs-toggle="modal" data-bs-target="#navSearchModal" aria-label="${searchLabel}" title="${searchLabel}">
+          <i class="bi bi-search" aria-hidden="true"></i>
+          <span class="visually-hidden">${searchLabel}</span>
+        </button>
+      </div>
   ` : '';
 
+  const searchModalBlock = cfg.search.enabled ? `
+<div class="modal fade mosp-search-modal" id="navSearchModal" tabindex="-1" aria-labelledby="navSearchModalTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <form class="modal-content" role="search" id="navSearchForm">
+      <div class="modal-header">
+        <h2 class="modal-title h5" id="navSearchModalTitle"><i class="bi bi-search me-2" aria-hidden="true"></i>${searchLabel}</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <label class="form-label fw-semibold" for="navSearch">${searchLabel}</label>
+        <input class="form-control form-control-lg mosp-nav-search-input" id="navSearch" type="search" placeholder="${searchPlaceholder}" aria-label="${searchLabel}" ${searchDatalist}>
+        ${searchDatalistHtml}
+        <div class="form-text">Search evidence/events, or type the name of a saved shortcut.</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-primary" type="submit"><i class="bi bi-search me-1" aria-hidden="true"></i>Search</button>
+      </div>
+    </form>
+  </div>
+</div>
+  ` : '';
+
+  const shortcutsLabel = esc(cfg.shortcuts.label || 'Shortcuts');
   const shortcutsBlock = cfg.shortcuts.enabled ? `
       <div class="dropdown me-2" id="navShortcutsWrap">
-        <button class="btn btn-sm btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-          ${esc(cfg.shortcuts.label || 'Shortcuts')}
+        <button class="btn btn-sm btn-outline-light" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="${shortcutsLabel}" title="${shortcutsLabel}">
+          <i class="bi bi-bookmark-star" aria-hidden="true"></i>
+          <span class="visually-hidden">${shortcutsLabel}</span>
         </button>
         <ul class="dropdown-menu dropdown-menu-end" id="navShortcutsMenu">
           <li><span class="dropdown-item-text text-muted">Loading…</span></li>
@@ -1284,9 +1436,10 @@ export function renderNavbar(active = '', me = null, cfgOverrides = null) {
 
   // Optional extension point for app-specific controls (kept out of core).
   const extraHtml = String(_resolveMaybeFn(cfg.nav?.extraHtml, me, cfg) || '');
+  const expandClass = String(cfg.nav?.expandClass || 'navbar-expand-xxl').replace(/[^A-Za-z0-9_-]/g, '') || 'navbar-expand-xxl';
 
   return `
-<nav class="navbar navbar-expand-lg navbar-dark navbar-keen fixed-top">
+<nav class="navbar ${esc(expandClass)} navbar-dark navbar-keen fixed-top">
   <div class="container-fluid">
     <a class="navbar-brand fw-bold d-flex align-items-center gap-2" ${cfg.framework.enabled ? 'data-nav-fw="1" data-base-href="' + esc(cfg.brandHref || '/') + '"' : ''} href="${esc(cfg.brandHref || '/')}">
       <img src="${esc(cfg.brandIcon || '/favicon.svg')}" class="keen-brand-icon" alt="" aria-hidden="true">
@@ -1299,7 +1452,7 @@ export function renderNavbar(active = '', me = null, cfgOverrides = null) {
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">${linkHtml}</ul>
       ${frameworkBlock}
       ${searchBlock}
-      <div class="d-flex align-items-center">
+      <div class="d-flex align-items-center mosp-nav-actions">
         ${extraHtml}
         ${shortcutsBlock}
         ${bellBlock}
@@ -1309,6 +1462,7 @@ export function renderNavbar(active = '', me = null, cfgOverrides = null) {
     </div>
   </div>
 </nav>
+${searchModalBlock}
 `;
 }
 
@@ -1435,13 +1589,18 @@ export async function initNavbar(cfgOverrides = null) {
     document.documentElement.style.setProperty('--ui-nav-height', `${h}px`);
     document.documentElement.style.setProperty('--keen-nav-height', `${h}px`); // legacy
   };
-  updateNavHeight();
-  window.addEventListener('resize', updateNavHeight);
+
+  // Let Bootstrap's navbar-expand-* breakpoint decide when to use the
+  // hamburger. While the nav is expanded, progressively tighten spacing/font
+  // size if the available width becomes cramped, including at browser zoom.
+  const refreshNavLayout = _initNavDensity(mount, updateNavHeight);
+  refreshNavLayout();
 
   // Framework picker + framework-aware nav links.
   if (cfg.framework.enabled) {
     try { await _initFrameworkSelector(cfg); }
     catch { _applyFrameworkToNavLinks(getCurrentFramework('', cfg), cfg); }
+    refreshNavLayout();
   }
 
   // Datalist autocomplete (optional)
@@ -1459,6 +1618,13 @@ export async function initNavbar(cfgOverrides = null) {
       const existingQ = qs(qKey);
       if (existingQ) inp.value = existingQ;
       if (cfg.search.datalistId) attachSavedAutocomplete(inp, cfg.search.datalistId);
+    }
+
+    const modalEl = document.getElementById('navSearchModal');
+    if (modalEl && inp) {
+      modalEl.addEventListener('shown.bs.modal', () => {
+        try { inp.focus(); inp.select(); } catch { /* ignore */ }
+      });
     }
 
     if (form && inp) {
@@ -1516,10 +1682,19 @@ export async function initNavbar(cfgOverrides = null) {
   // Shortcuts dropdown
   if (cfg.shortcuts.enabled) {
     await _loadShortcuts(cfg);
+    refreshNavLayout();
   }
 
   // Bell
   await _initBell(cfg, me);
+  refreshNavLayout();
+
+  // Keep content offset correct while the hamburger menu opens/closes.
+  const navCollapse = mount.querySelector('.navbar-collapse');
+  if (navCollapse) {
+    navCollapse.addEventListener('shown.bs.collapse', refreshNavLayout);
+    navCollapse.addEventListener('hidden.bs.collapse', refreshNavLayout);
+  }
 
   // Collapsible filter/visualisation sections
   try { initCollapsibleFilterSections(cfg); } catch {}
@@ -1784,7 +1959,7 @@ function sortTableByColumn(table, colIndex) {
 // Toast helper
 // ---------------------------------------------------------------------------
 
-export function toast(containerEl, message, kind = 'info', ttlMs = 0) {
+export function toast(containerEl, message, kind = 'info', ttlMs = 4000) {
   if (!containerEl) return;
   const cls = {
     info: 'alert alert-info',
@@ -1800,7 +1975,7 @@ export function toast(containerEl, message, kind = 'info', ttlMs = 0) {
   const token = String(Date.now()) + String(Math.random());
   containerEl.dataset.toastToken = token;
 
-  const ms = Number(ttlMs || 0);
+  const ms = Number(ttlMs ?? 4000);
   if (ms > 0) {
     window.setTimeout(() => {
       if (containerEl.dataset.toastToken === token) {
