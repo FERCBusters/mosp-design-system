@@ -197,6 +197,12 @@ const DEFAULT_CONFIG = {
     method: 'PATCH',
     stickyField: 'sticky_enabled',
   },
+  // Visible text-date format for shared date helpers. Native/API values stay YYYY-MM-DD.
+  // Apps may override with `dateFormat: 'dmy'` or `locale: {dateFormat: 'dmy'}`.
+  dateFormat: 'ymd',
+  locale: {
+    dateFormat: 'ymd',
+  },
   // Optional hook to adjust the returned `me` object (e.g. map shape across apps)
   mapMe: null,
 };
@@ -1567,6 +1573,7 @@ export async function initNavbar(cfgOverrides = null) {
 
   // Store preferences for timestamp formatting helpers
   window.mospDefaultTimezone = me?.default_timezone || 'Etc/UTC';
+  window.mospDefaultDateFormat = me?.default_date_format || getUiConfig().dateFormat || 'ymd';
   window.mospPreferences = me?.preferences || {};
   window.mospPreferredFramework = _normFramework(me?.preferences?.default_framework);
 
@@ -1799,46 +1806,129 @@ export function tsSortKey(iso) {
   return d ? String(d.getTime()) : '';
 }
 
-// --- Date inputs (dd/mm/yyyy) ---
-export function isoDateToDmy(iso) {
+// --- Date inputs (configurable visible format, ISO on the wire) ---
+export const DATE_FORMATS = Object.freeze({
+  ymd: 'YYYY-MM-DD',
+  dmy: 'DD/MM/YYYY',
+});
+
+export function normalizeDateFormat(raw, fallback = 'ymd') {
+  const v = String(raw || '').trim().toLowerCase();
+  if (v === 'dd/mm/yyyy' || v === 'dd-mm-yyyy' || v === 'dmy') return 'dmy';
+  if (v === 'yyyy-mm-dd' || v === 'yyyy/mm/dd' || v === 'iso' || v === 'ymd') return 'ymd';
+  if (fallback === '') return '';
+  return fallback === 'dmy' ? 'dmy' : 'ymd';
+}
+
+export function preferredDateFormat(opts = {}) {
+  if (opts && opts.format) return normalizeDateFormat(opts.format);
+  const prefs = (typeof window !== 'undefined' && window.mospPreferences) ? window.mospPreferences : {};
+  const prefRaw = String(prefs.date_format || prefs.dateFormat || '').trim().toLowerCase();
+  const pref = prefRaw === 'default' ? '' : normalizeDateFormat(prefRaw, '');
+  if (pref) return pref;
+  const globalDefault = (typeof window !== 'undefined' && window.mospDefaultDateFormat) ? window.mospDefaultDateFormat : '';
+  if (globalDefault) return normalizeDateFormat(globalDefault);
+  try {
+    const cfg = getUiConfig();
+    return normalizeDateFormat(cfg?.dateFormat || cfg?.locale?.dateFormat || 'ymd');
+  } catch {
+    return 'ymd';
+  }
+}
+
+function _isoDateParts(iso) {
   const s = String(iso || '').trim();
   const m = s.match(/^\s*(\d{4})-(\d{2})-(\d{2})\s*$/);
-  if (!m) return '';
-  return `${m[3]}/${m[2]}/${m[1]}`;
+  if (!m) return null;
+  return {yyyy: m[1], mm: m[2], dd: m[3]};
+}
+
+export function isoDateToDisplay(iso, format = null) {
+  const p = _isoDateParts(iso);
+  if (!p) return '';
+  const fmt = preferredDateFormat({format});
+  if (fmt === 'dmy') return `${p.dd}/${p.mm}/${p.yyyy}`;
+  return `${p.yyyy}-${p.mm}-${p.dd}`;
+}
+
+export function isoDateToDmy(iso) {
+  return isoDateToDisplay(iso, 'dmy');
+}
+
+function _validIsoDate(yyyy, mm, dd) {
+  const y = Number(yyyy);
+  const m = Number(mm);
+  const d = Number(dd);
+  if (!Number.isFinite(y) || !Number.isFinite(m) || !Number.isFinite(d)) return '';
+  if (y < 1900 || y > 3000) return '';
+  if (m < 1 || m > 12) return '';
+  if (d < 1 || d > 31) return '';
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  if (dt.getUTCFullYear() !== y || dt.getUTCMonth() !== (m - 1) || dt.getUTCDate() !== d) return '';
+  const pad2 = (n) => String(n).padStart(2, '0');
+  return `${y}-${pad2(m)}-${pad2(d)}`;
+}
+
+export function displayDateToIso(value, format = null) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+
+  // Always accept canonical ISO input, even when the preferred visible format is DD/MM/YYYY.
+  let m = raw.match(/^\s*(\d{4})-(\d{1,2})-(\d{1,2})\s*$/);
+  if (m) return _validIsoDate(m[1], m[2], m[3]);
+
+  const fmt = preferredDateFormat({format});
+  if (fmt === 'dmy') {
+    m = raw.match(/^\s*(\d{1,2})\/(\d{1,2})\/(\d{4})\s*$/);
+    if (m) return _validIsoDate(m[3], m[2], m[1]);
+  }
+
+  return '';
 }
 
 export function dmyToIsoDate(dmy) {
-  const raw = String(dmy || '').trim();
-  if (!raw) return '';
-  const m = raw.match(/^\s*(\d{1,2})\/(\d{1,2})\/(\d{4})\s*$/);
-  if (!m) return '';
-  const dd = Number(m[1]);
-  const mm = Number(m[2]);
-  const yyyy = Number(m[3]);
-  if (!Number.isFinite(dd) || !Number.isFinite(mm) || !Number.isFinite(yyyy)) return '';
-  if (yyyy < 1900 || yyyy > 3000) return '';
-  if (mm < 1 || mm > 12) return '';
-  if (dd < 1 || dd > 31) return '';
-  const dt = new Date(Date.UTC(yyyy, mm - 1, dd));
-  if (dt.getUTCFullYear() !== yyyy || dt.getUTCMonth() !== (mm - 1) || dt.getUTCDate() !== dd) return '';
-  const pad2 = (n) => String(n).padStart(2, '0');
-  return `${yyyy}-${pad2(mm)}-${pad2(dd)}`;
+  return displayDateToIso(dmy, 'dmy');
 }
 
-export function wireIsoDmyDateField(hidden, text, pickBtn, opts = {}) {
+export function dateFormatPlaceholder(format = null) {
+  const fmt = preferredDateFormat({format});
+  return fmt === 'dmy' ? 'DD/MM/YYYY' : 'YYYY-MM-DD';
+}
+
+export function wireIsoDateTextField(hidden, text, pickBtn, opts = {}) {
   if (!hidden || !text) return null;
 
+  const format = preferredDateFormat(opts);
   const listenInput = (opts && Object.prototype.hasOwnProperty.call(opts, 'listenInput')) ? !!opts.listenInput : true;
   const dispatchChangeOnText = (opts && Object.prototype.hasOwnProperty.call(opts, 'dispatchChangeOnText')) ? !!opts.dispatchChangeOnText : false;
   const bubbles = (opts && Object.prototype.hasOwnProperty.call(opts, 'bubbles')) ? !!opts.bubbles : true;
+  const invalidClass = opts.invalidClass || 'is-invalid';
 
-  const syncTextFromHidden = () => { text.value = isoDateToDmy(hidden.value || ''); };
+  if (!text.getAttribute('placeholder')) text.setAttribute('placeholder', dateFormatPlaceholder(format));
+  if (!text.getAttribute('inputmode')) text.setAttribute('inputmode', 'numeric');
+  if (!text.getAttribute('autocomplete')) text.setAttribute('autocomplete', 'off');
+
+  const syncTextFromHidden = () => {
+    text.value = isoDateToDisplay(hidden.value || '', format);
+    text.classList.remove(invalidClass);
+  };
 
   const syncHiddenFromText = () => {
     const raw = String(text.value || '').trim();
-    if (!raw) { hidden.value = ''; return; }
-    const iso = dmyToIsoDate(raw);
-    if (iso) hidden.value = iso;
+    if (!raw) {
+      hidden.value = '';
+      text.classList.remove(invalidClass);
+      return true;
+    }
+    const iso = displayDateToIso(raw, format);
+    if (iso) {
+      hidden.value = iso;
+      text.value = isoDateToDisplay(iso, format);
+      text.classList.remove(invalidClass);
+      return true;
+    }
+    text.classList.add(invalidClass);
+    return false;
   };
 
   const maybeDispatchHiddenChange = () => {
@@ -1849,8 +1939,8 @@ export function wireIsoDmyDateField(hidden, text, pickBtn, opts = {}) {
   if (listenInput) hidden.addEventListener('input', syncTextFromHidden);
   hidden.addEventListener('change', syncTextFromHidden);
 
-  text.addEventListener('change', () => { syncHiddenFromText(); maybeDispatchHiddenChange(); });
-  text.addEventListener('blur', () => { syncHiddenFromText(); maybeDispatchHiddenChange(); });
+  text.addEventListener('change', () => { if (syncHiddenFromText()) maybeDispatchHiddenChange(); });
+  text.addEventListener('blur', () => { if (syncHiddenFromText()) maybeDispatchHiddenChange(); });
 
   if (pickBtn) {
     pickBtn.addEventListener('click', () => {
@@ -1862,7 +1952,11 @@ export function wireIsoDmyDateField(hidden, text, pickBtn, opts = {}) {
   }
 
   syncTextFromHidden();
-  return {syncTextFromHidden, syncHiddenFromText};
+  return {syncTextFromHidden, syncHiddenFromText, format};
+}
+
+export function wireIsoDmyDateField(hidden, text, pickBtn, opts = {}) {
+  return wireIsoDateTextField(hidden, text, pickBtn, {...opts, format: 'dmy'});
 }
 
 // ---------------------------------------------------------------------------
