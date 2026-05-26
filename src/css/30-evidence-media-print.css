@@ -1,0 +1,130 @@
+/* MOSP design system: Evidence image/PDF previews and print/export-friendly evidence styling.
+   Concatenated by scripts/build.mjs. */
+
+/* Diary / evidence image previews */
+.evidence-img {
+  width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+  border-radius: 14px;
+  border: 1px solid rgba(31,31,42,0.12);
+  box-shadow: 0 8px 18px rgba(20, 20, 40, 0.06);
+  background: #fff;
+}
+
+/* PDFs should not be cropped like photos. */
+.evidence-img.evidence-pdf-thumb {
+  object-fit: contain;
+  max-height: 260px;
+  background: rgba(0,0,0,0.02);
+}
+
+/*
+  PDF export (html2canvas) does not reliably honor object-fit. To avoid stretched
+  thumbnails in the generated PDF, override evidence thumbnail sizing inside the
+  hidden export capture container so images keep their intrinsic aspect ratio.
+*/
+.export-capture #imagePreviews a.d-block {
+  display: flex !important;
+  justify-content: center !important;
+}
+.export-capture .evidence-img {
+  width: auto !important;
+  height: auto !important;
+  max-width: 100% !important;
+  max-height: 520px !important;
+  object-fit: unset !important;
+}
+.export-capture .evidence-img.evidence-pdf-thumb {
+  max-height: 560px !important;
+}
+
+/* Diary / evidence PDF previews */
+.pdf-preview-card {
+  border: 1px solid rgba(31,31,42,0.12);
+  border-radius: 14px;
+  background: rgba(255,255,255,0.78);
+  padding: 10px;
+}
+.pdf-frame-wrap {
+  border: 1px solid rgba(31,31,42,0.12);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+  height: 260px;
+}
+.evidence-pdf {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.pdf-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: rgba(31,31,42,0.65);
+  font-size: 13px;
+}
+
+/* Evidence sampling: print-friendly */
+@media print {
+  .navbar, .no-print { display: none !important; }
+  body { background: #fff !important; padding-top: 32px !important; }
+  .card { box-shadow: none !important; border: 1px solid #ddd !important; }
+  a[href]:after { content: ""; } /* avoid printing long URLs */
+
+  /* Prefer readable images in evidence PDFs */
+  .evidence-img {
+    max-height: 520px;
+    object-fit: contain;
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+
+
+  /* Header text for "Sample as PDF evidence" (fixed so it repeats per page in Chromium) */
+  .pdf-header[data-enabled="1"] {
+    display: block !important;
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    padding: 6px 12px;
+    text-align: center;
+    font-size: 10px;
+    color: #666;
+    border-bottom: 1px solid #ddd;
+    background: #fff;
+  }
+  /* Footer text for "Sample as PDF evidence" (fixed so it repeats per page in Chromium) */
+  .pdf-footer[data-enabled="1"] {
+    display: block !important;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 6px 12px;
+    text-align: center;
+    font-size: 10px;
+    color: #666;
+    border-top: 1px solid #ddd;
+    background: #fff;
+  }
+
+  /* Footer layout + page numbers (works in Chromium/Chrome print engines) */
+  .pdf-footer[data-enabled="1"] .pdf-footer-inner {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+  }
+  .pdf-footer[data-enabled="1"] .pdf-footer-text:empty { display: none; }
+
+  /* Leave space so content doesn't collide with the footer */
+  body { padding-bottom: 32px; }
+}
+
+/* Hidden by default (shown only in print media above) */
+.pdf-header { display: none; }
+.pdf-footer { display: none; }

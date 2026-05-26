@@ -1,0 +1,67 @@
+/* MOSP design system: Admin tab layout and wrapped multi-select form controls.
+   Concatenated by scripts/build.mjs. */
+
+/* ------------------------------------------------------------
+   Admin panel UX tweaks
+   ------------------------------------------------------------ */
+
+/* Vertical tab rail (Admin) */
+.admin-tab-layout { align-items: flex-start; }
+.admin-tab-nav {
+  min-width: 240px;
+  padding: 10px;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.70);
+  border: 1px solid rgba(var(--keen-accent-rgb),0.16);
+  box-shadow: 0 8px 18px rgba(20,20,40,0.04);
+}
+.admin-tab-nav .nav-link {
+  text-align: left;
+  border-radius: 14px;
+  padding: 10px 12px;
+  font-weight: 650;
+  color: var(--keen-ink);
+}
+.admin-tab-nav .nav-link:hover {
+  background: rgba(var(--keen-accent-rgb),0.08);
+}
+.admin-tab-nav .nav-link.active {
+  background: rgba(var(--keen-accent-rgb),0.16);
+  color: var(--keen-accent-700);
+}
+
+/* Wrapped multi-select (Special Permissions) */
+select.keen-multiselect-native-hidden { display: none; }
+
+.keen-multiselect-wrap {
+  border: 1px solid rgba(31,31,42,0.16);
+  border-radius: 12px;
+  background: rgba(255,255,255,0.92);
+  padding: 6px;
+  max-height: 270px;
+  overflow: auto;
+}
+
+.keen-multiselect-wrap .keen-ms-option {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 7px 8px;
+  border-radius: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.keen-multiselect-wrap .keen-ms-option:hover {
+  background: rgba(var(--keen-accent-rgb),0.06);
+}
+
+.keen-multiselect-wrap .keen-ms-option input[type="checkbox"] {
+  margin-top: 2px;
+}
+
+.keen-multiselect-wrap .keen-ms-label {
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.2;
+}

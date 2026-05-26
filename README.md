@@ -1,4 +1,4 @@
-# @mydex/mydex-design-system
+# @mydex/mosp-design-system
 
 A small shared UI "shell" + helper library designed to be used across various Mydex Open Source projects.
 
@@ -25,16 +25,20 @@ It assumes you're serving mostly-static HTML pages (no SPA) and using:
 - `apiGet/apiPost/apiPatch/apiPut/apiDelete/apiPostForm`
 - querystring helpers (`qs/qbool/qint/setQuery`)
 - timestamp helpers (`fmtTs`, filename-safe `fmtTsFilename`)
-- dd/mm/yyyy ↔ yyyy-mm-dd helpers
+- configurable visible date-format ↔ yyyy-mm-dd helpers
 - sortable tables
 - `toast()` helper for Bootstrap alerts
 - `bindAutoApply()` helper (debounced auto-apply for filters)
 
 ## Files
 
-- `dist/app.js` – ESM module (import from pages)
-- `dist/styles.css` – themeable CSS
-- `src/*` – source (currently identical to dist; build copies src → dist)
+- `dist/app.js` – bundled ESM module for consuming applications.
+- `dist/styles.css` – bundled themeable CSS for consuming applications.
+- `src/js/*.js` – maintainable JavaScript source fragments, split by feature area.
+- `src/css/*.css` – maintainable CSS source fragments, split by feature area.
+- `scripts/build.mjs` – concatenates the ordered source fragments into `dist/app.js` and `dist/styles.css`.
+
+The source fragments intentionally share one bundle scope and are concatenated in the explicit order listed in `scripts/build.mjs`. Edit the relevant file under `src/js/` or `src/css/`, then run `npm run build`; do not edit generated files under `dist/` directly.
 
 ## Basic integration pattern (static HTML)
 

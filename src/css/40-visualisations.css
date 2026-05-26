@@ -1,0 +1,91 @@
+/* MOSP design system: Shared D3 visualisation containers, SVG primitives, graph labels, heatmaps, sunbursts, and sortable-table indicators.
+   Concatenated by scripts/build.mjs. */
+
+/* Visualisation page (moved from inline <style> in visualisation.html) */
+#vizWrap {
+  border: 1px solid rgba(var(--keen-accent-rgb),0.22);
+  border-radius: 18px;
+  background: rgba(255,255,255,0.75);
+  overflow: auto;
+}
+/* Keep this scoped to the visualisation SVG (other pages may have inline SVGs). */
+#viz { width: 100%; display: block; }
+.node { cursor: pointer; }
+/* Graph nodes: dark tiles with white labels */
+.node text {
+  font-size: 11px;
+  font-weight: 600;
+  fill: rgba(255,255,255,0.92);
+  paint-order: stroke;
+  stroke: rgba(0,0,0,0.35);
+  stroke-width: 0.8px;
+  pointer-events: none;
+}
+
+/* Bigger labels for Source boxes only */
+.node-source text {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.link { stroke: rgba(var(--keen-accent-rgb),0.30); stroke-opacity: 0.9; }
+/* Visualisation node styles */
+.node-source rect { fill: rgba(var(--keen-accent-rgb),0.86); stroke: rgba(255,255,255,0.18); }
+.node-control rect { fill: rgba(31,31,42,0.82); stroke: rgba(255,255,255,0.18); }
+.link { stroke: rgba(var(--keen-accent-rgb),0.28); stroke-linecap: round; }
+
+/* Generic chart primitives */
+.viz-axis text { font-size: 10px; fill: rgba(31,31,42,0.70); }
+.viz-axis path, .viz-axis line { stroke: rgba(31,31,42,0.18); }
+
+.viz-legend text { font-size: 11px; fill: rgba(31,31,42,0.75); }
+
+/* Histogram brush */
+.hist-main-brush .selection,
+.hist-brush .selection {
+  fill: rgba(var(--keen-accent-rgb),0.16);
+  stroke: rgba(var(--keen-accent-rgb),0.50);
+  stroke-width: 1;
+}
+.hist-main-brush .handle,
+.hist-brush .handle {
+  fill: rgba(var(--keen-accent-rgb),0.35);
+}
+
+/* Heatmap */
+.heat-cell { cursor: pointer; stroke: rgba(31,31,42,0.08); }
+
+/* Sunburst */
+.sunburst-arc { cursor: pointer; stroke: rgba(255,255,255,0.9); stroke-width: 1; }
+
+.sunburst-label {
+  font-size: 14px;
+  font-weight: 600;
+  fill: rgba(255,255,255,0.92);
+  paint-order: stroke;
+  stroke: rgba(0,0,0,0.35);
+  stroke-width: 1.25px;
+}
+
+.sunburst-label-depth1 { font-size: 16px; font-weight: 700; }
+
+/* Depth 2 labels can get dense; reduce stroke weight slightly to avoid a "muddled" look. */
+.sunburst-label-depth2,
+.sunburst-label-depth3,
+.sunburst-label-depth4 {
+  stroke: none;
+  stroke-width: 0px;
+  font-size: 14px;
+}
+
+
+
+/* Sortable tables */
+th.sortable { cursor: pointer; user-select: none; }
+th.sortable.sort-asc::after { content: " \2191"; opacity: 0.65; font-size: 0.9em; }
+th.sortable.sort-desc::after { content: " \2193"; opacity: 0.65; font-size: 0.9em; }
+
+.mapping-rationale {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

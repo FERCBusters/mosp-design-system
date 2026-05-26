@@ -1,0 +1,171 @@
+/* MOSP design system: Cards, KPI blocks, badges, sticky tables, subtle links, themed buttons, and code blocks.
+   Concatenated by scripts/build.mjs. */
+
+.container-tight { max-width: 1400px; }
+
+.card {
+  /* Keep Bootstrap card parts (header/footer/images) aligned to our larger radius */
+  --bs-card-border-radius: 18px;
+  --bs-card-inner-border-radius: calc(18px - var(--bs-card-border-width, 1px));
+  border: 1px solid rgba(var(--keen-accent-rgb),0.20);
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(20, 20, 40, 0.06);
+}
+.card-header {
+  background: linear-gradient(180deg, rgba(var(--keen-accent-rgb),0.10) 0%, rgba(var(--keen-accent-rgb),0.02) 100%);
+  border-bottom: 1px solid rgba(var(--keen-accent-rgb),0.18);
+}
+
+/* Prevent squared header/footer backgrounds from visually fighting the rounded card corners */
+.card > .card-header:first-child {
+  background-clip: padding-box;
+}
+.card > .card-footer:last-child {
+  background-clip: padding-box;
+}
+
+.kpi {
+  border-radius: 18px;
+  border: 1px solid rgba(var(--keen-accent-rgb),0.22);
+  background: rgba(255,255,255,0.78);
+  box-shadow: 0 10px 22px rgba(20, 20, 40, 0.05);
+  padding: 14px 16px;
+}
+.kpi .label { color: var(--keen-muted); font-size: 12px; }
+.kpi .value { font-size: 22px; font-weight: 700; letter-spacing: -0.2px; }
+
+.badge-soft {
+  background: rgba(var(--keen-accent-rgb),0.10);
+  border: 1px solid rgba(var(--keen-accent-rgb),0.24);
+  color: var(--keen-purple-700);
+  font-weight: 600;
+}
+
+/* Source badges get a deterministic per-source tint (via --src-rgb) */
+.badge-source {
+  --src-rgb: var(--keen-accent-rgb);
+  background: rgba(var(--src-rgb),0.12);
+  border: 1px solid rgba(var(--src-rgb),0.32);
+  color: rgb(var(--src-rgb));
+  font-weight: 650;
+}
+.badge-source:hover {
+  text-decoration: none;
+  filter: brightness(0.96);
+}
+
+.badge-chip {
+  background: rgba(31,31,42,0.04);
+  border: 1px solid rgba(31,31,42,0.10);
+  color: var(--keen-ink);
+  font-weight: 600;
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 12.5px;
+}
+
+/* Sticky table headers.
+   Important: do not leave .table-responsive as a scrolling ancestor on desktop,
+   otherwise sticky <th> cells stick inside that wrapper immediately and can
+   visually overlap the first body row. Let page scroll drive stickiness. */
+.table-responsive {
+  position: relative;
+  overflow: visible !important;
+}
+
+.table-responsive > .table,
+.table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.table thead {
+  position: relative;
+  z-index: 2;
+}
+
+.table thead th {
+  position: sticky;
+  top: calc(var(--ui-nav-height, var(--keen-nav-height, 0px)) + 0.25rem);
+  z-index: 20;
+  background: var(--bs-body-bg, #fff) !important;
+  background-image: none !important;
+  background-clip: padding-box;
+  box-shadow: inset 0 -1px 0 rgba(var(--keen-accent-rgb),0.22);
+  color: rgba(31,31,42,0.85);
+  font-weight: 700;
+  border-bottom: 1px solid rgba(var(--keen-accent-rgb),0.22) !important;
+}
+
+@media (max-width: 991.98px) {
+  .table-responsive {
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Mobile/tablet keeps horizontal scrolling; disable sticky there because the
+     scrolling wrapper becomes the containing block and causes header overlap. */
+  .table-responsive .table thead th {
+    position: static;
+  }
+}
+.table td, .table th { vertical-align: top; }
+.table td.wrap {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.small-muted { color: var(--keen-muted); font-size: 12px; }
+
+a.link-subtle { color: rgba(31,31,42,0.75); text-decoration: none; }
+a.link-subtle:hover { color: rgba(31,31,42,0.95); text-decoration: underline; }
+
+/* Make Bootstrap primary buttons follow the active KEEN theme palette.
+   Bootstrap's compiled .btn-primary ships with static button variables, so
+   overriding --bs-primary alone is not enough. */
+.btn-primary {
+  --bs-btn-color: var(--keen-accent-contrast);
+  --bs-btn-bg: var(--keen-accent);
+  --bs-btn-border-color: var(--keen-accent);
+  --bs-btn-hover-color: var(--keen-accent-contrast);
+  --bs-btn-hover-bg: var(--keen-accent-700);
+  --bs-btn-hover-border-color: var(--keen-accent-700);
+  --bs-btn-focus-shadow-rgb: var(--keen-accent-rgb);
+  --bs-btn-active-color: var(--keen-accent-contrast);
+  --bs-btn-active-bg: var(--keen-accent-700);
+  --bs-btn-active-border-color: var(--keen-accent-700);
+  --bs-btn-disabled-color: var(--keen-accent-contrast);
+  --bs-btn-disabled-bg: var(--keen-accent);
+  --bs-btn-disabled-border-color: var(--keen-accent);
+}
+
+.btn-outline-primary {
+  --bs-btn-color: var(--keen-accent-700);
+  --bs-btn-border-color: rgba(var(--keen-accent-rgb),0.55);
+  --bs-btn-hover-color: var(--keen-accent-contrast);
+  --bs-btn-hover-bg: var(--keen-accent);
+  --bs-btn-hover-border-color: var(--keen-accent);
+  --bs-btn-focus-shadow-rgb: var(--keen-accent-rgb);
+  --bs-btn-active-color: var(--keen-accent-contrast);
+  --bs-btn-active-bg: var(--keen-accent-700);
+  --bs-btn-active-border-color: var(--keen-accent-700);
+  --bs-btn-disabled-color: var(--keen-accent-700);
+  --bs-btn-disabled-border-color: rgba(var(--keen-accent-rgb),0.35);
+}
+
+.btn-outline-primary:hover {
+  border-color: rgba(var(--keen-accent-rgb),0.75);
+}
+
+pre.pretty {
+  background: rgba(var(--keen-accent-rgb),0.06);
+  border: 1px solid rgba(var(--keen-accent-rgb),0.18);
+  border-radius: 14px;
+  padding: 12px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

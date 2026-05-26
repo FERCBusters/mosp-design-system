@@ -1,0 +1,171 @@
+/* MOSP design system: Base body layout, print view handling, and shared navbar styling.
+   Concatenated by scripts/build.mjs. */
+
+}
+
+/* A dedicated print view (opened via ?print=1) hides the fixed navbar even on-screen */
+body.print-view {
+  padding-top: 0 !important;
+}
+body.print-view #navbar,
+body.print-view .no-print {
+  display: none !important;
+}
+
+.navbar-keen {
+  background: var(--keen-purple);
+  box-shadow: 0 6px 18px rgba(var(--keen-accent-rgb),0.22);
+  z-index: 1050; /* stay above cards + dropdowns */
+}
+.navbar-keen .navbar-brand,
+.navbar-keen .nav-link,
+.navbar-keen .navbar-text { color: #fff !important; }
+.navbar-keen .nav-link { opacity: 0.95; }
+.navbar-keen .nav-link:hover { opacity: 1; text-decoration: none; background: rgba(255,255,255,0.16); border-radius: 10px; }
+.navbar-keen .nav-link.active {
+  background: rgba(255,255,255,0.18);
+  border-radius: 10px;
+}
+.navbar-keen .form-control {
+  border: 1px solid rgba(255,255,255,0.35);
+  background: rgba(255,255,255,0.95);
+}
+.navbar-keen .btn.btn-light {
+  border: 1px solid rgba(255,255,255,0.55);
+}
+.navbar-keen .keen-brand-icon {
+  height: 28px;
+  width: auto;
+  filter: brightness(0) invert(1) drop-shadow(0 1px 1px rgba(0,0,0,0.35));
+  opacity: 0.95;
+}
+
+.navbar-keen .container-fluid { gap: 0.25rem; }
+.navbar-keen .navbar-brand {
+  margin-right: 0.75rem;
+  white-space: nowrap;
+}
+.navbar-keen .navbar-nav { min-width: 0; }
+.navbar-keen .nav-link {
+  padding-left: 0.55rem;
+  padding-right: 0.55rem;
+}
+.navbar-keen .navbar-brand,
+.navbar-keen .nav-link,
+.navbar-keen .btn,
+.navbar-keen .form-select {
+  white-space: nowrap;
+}
+.navbar-keen .navbar-brand { font-size: 0.95rem; }
+.navbar-keen .nav-link { font-size: 0.9rem; }
+.navbar-keen .btn,
+.navbar-keen .form-select { font-size: 0.875rem; }
+.navbar-keen.nav-density-compact .navbar-brand {
+  font-size: 0.88rem;
+  margin-right: 0.45rem;
+}
+.navbar-keen.nav-density-compact .keen-brand-icon {
+  height: 24px;
+}
+.navbar-keen.nav-density-compact .nav-link {
+  font-size: 0.82rem;
+  padding-left: 0.38rem;
+  padding-right: 0.38rem;
+}
+.navbar-keen.nav-density-compact .btn,
+.navbar-keen.nav-density-compact .form-select {
+  font-size: 0.8rem;
+  padding-left: 0.45rem;
+  padding-right: 0.45rem;
+}
+.navbar-keen.nav-density-compact .mosp-nav-framework {
+  gap: 0.3rem !important;
+  margin-right: 0.35rem !important;
+}
+.navbar-keen.nav-density-tight .navbar-brand {
+  font-size: 0.82rem;
+  margin-right: 0.25rem;
+}
+.navbar-keen.nav-density-tight .keen-brand-icon {
+  height: 22px;
+}
+.navbar-keen.nav-density-tight .nav-link {
+  font-size: 0.76rem;
+  padding-left: 0.28rem;
+  padding-right: 0.28rem;
+}
+.navbar-keen.nav-density-tight .btn,
+.navbar-keen.nav-density-tight .form-select {
+  font-size: 0.74rem;
+  padding-left: 0.35rem;
+  padding-right: 0.35rem;
+}
+.navbar-keen.nav-density-tight .mosp-nav-framework-label,
+.navbar-keen.nav-density-tight .nav-label-optional { display: none; }
+.navbar-keen.nav-density-tight .mosp-nav-framework-select {
+  width: min(var(--mosp-fw-select-ch, 14ch), 16ch);
+}
+.navbar-keen.nav-density-tight .mosp-nav-actions > *,
+.navbar-keen.nav-density-tight .mosp-nav-search,
+.navbar-keen.nav-density-tight .mosp-nav-framework {
+  margin-right: 0.25rem !important;
+}
+.navbar-keen.nav-density-overflow .navbar-brand span {
+  max-width: 5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.navbar-keen .mosp-nav-framework,
+.navbar-keen .mosp-nav-actions {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+.navbar-keen .mosp-nav-framework-select {
+  width: var(--mosp-fw-select-ch, 16ch);
+  min-width: 0;
+  max-width: min(20rem, 45vw);
+}
+.navbar-keen .mosp-nav-search {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+.navbar-keen .mosp-nav-search-button {
+  min-width: 2.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.mosp-search-modal .mosp-nav-search-input {
+  width: 100%;
+}
+.navbar-keen .mosp-nav-actions {
+  white-space: nowrap;
+}
+@media (max-width: 1399.98px) {
+  .navbar-keen .navbar-collapse { padding-top: 0.75rem; }
+  .navbar-keen .navbar-brand span {
+    max-width: 8rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .navbar-keen .mosp-nav-framework,
+  .navbar-keen .mosp-nav-search,
+  .navbar-keen .mosp-nav-actions {
+    margin-top: 0.5rem;
+  }
+  .navbar-keen .mosp-nav-framework-label { display: none; }
+  .navbar-keen .mosp-nav-framework-select {
+    max-width: min(20rem, 100%);
+  }
+  .navbar-keen .mosp-nav-search {
+    width: auto;
+    max-width: none;
+    min-width: 0;
+  }
+  .navbar-keen .mosp-nav-actions {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    white-space: normal;
+  }
+  .navbar-keen .mosp-nav-actions > * { margin-right: 0 !important; }
+}

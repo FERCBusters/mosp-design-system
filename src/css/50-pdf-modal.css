@@ -1,0 +1,51 @@
+/* MOSP design system: PDF preview/orientation modal styles.
+   Concatenated by scripts/build.mjs. */
+
+/* Evidence PDF orientation preview modal */
+.pdf-preview-grid { margin-top: 6px; }
+.pdf-preview-option {
+  border: 1px solid rgba(var(--keen-accent-rgb), 0.20);
+  border-radius: 16px;
+  padding: 12px;
+  background: #fff;
+  cursor: pointer;
+}
+.pdf-preview-option:hover {
+  border-color: rgba(var(--keen-accent-rgb), 0.40);
+  box-shadow: 0 8px 22px rgba(20, 20, 40, 0.08);
+}
+.pdf-preview-option.selected {
+  border-color: rgba(var(--keen-accent-rgb), 0.65);
+  box-shadow: 0 10px 26px rgba(20, 20, 40, 0.10);
+}
+.pdf-preview-option:focus {
+  outline: 2px solid rgba(var(--keen-accent-rgb), 0.55);
+  outline-offset: 2px;
+}
+.pdf-preview-frame {
+  position: relative;
+  border: 1px solid rgba(var(--keen-accent-rgb), 0.16);
+  border-radius: 14px;
+  height: 260px;
+  background: #f8fafc;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pdf-preview-img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: none;
+}
+.pdf-preview-frame.has-img .pdf-preview-img { display: block; }
+.pdf-preview-frame.has-img .pdf-preview-placeholder { display: none; }
+.pdf-preview-placeholder {
+  color: #6b7280;
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 0 10px;
+}

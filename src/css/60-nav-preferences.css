@@ -1,0 +1,71 @@
+/* MOSP design system: Navigation controls, shortcut/bell affordances, and shared preference UI pieces.
+   Concatenated by scripts/build.mjs. */
+
+/* ------------------------------------------------------------------
+   Event question (auditor Q&A threads)
+   ------------------------------------------------------------------ */
+
+.question-thread {
+  border: 1px solid rgba(var(--keen-accent-rgb),0.18);
+  border-radius: 16px;
+  background: rgba(255,255,255,0.78);
+  box-shadow: 0 8px 18px rgba(20, 20, 40, 0.04);
+  padding: 12px 14px;
+  margin-bottom: 12px;
+}
+
+
+.question-thread-focus {
+  box-shadow: 0 0 0 3px rgba(255,193,7,0.35);
+}
+
+.question-thread .question-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.question-thread .question-title {
+  font-weight: 700;
+}
+
+.question-thread .question-status {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.question-post {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(31,31,42,0.10);
+  background: rgba(255,255,255,0.9);
+}
+
+.question-post .question-post-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.question-attachments a {
+  display: inline-block;
+  margin-right: 10px;
+}
+
+.nav-question-bell {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.nav-question-bell .badge {
+  position: absolute;
+  top: -7px;
+  right: -9px;
+  font-size: 10px;
+}
