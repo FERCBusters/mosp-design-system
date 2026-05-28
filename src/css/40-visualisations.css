@@ -1,7 +1,7 @@
 /* MOSP design system: Shared D3 visualisation containers, SVG primitives, graph labels, heatmaps, sunbursts, and sortable-table indicators.
    Concatenated by scripts/build.mjs. */
 
-/* Visualisation page (moved from inline <style> in visualisation.html) */
+/* Shared visualisation containers */
 #vizWrap {
   border: 1px solid rgba(var(--keen-accent-rgb),0.22);
   border-radius: 18px;

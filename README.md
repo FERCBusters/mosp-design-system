@@ -86,7 +86,6 @@ Example for KEEN:
       { label: "Controls", href: "/?stay=1", key: "controls" },
       { label: "Events", href: "/events.html", key: "events" },
       { label: "Sources", href: "/sources.html", key: "sources" },
-      { label: "Visualisation", href: "/visualisation.html", key: "viz" },
       { label: "Admin", href: "/admin.html", key: "admin", requireAny: ["is_admin", "can_audit_trail"] }
     ],
     framework: {

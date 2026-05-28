@@ -20,7 +20,6 @@ const DEFAULT_CONFIG = {
     {key: 'clauses', label: 'Clauses', href: '/clauses.html'},
     {key: 'events', label: 'Events', href: '/events.html'},
     {key: 'sources', label: 'Sources', href: '/sources.html'},
-    {key: 'viz', label: 'Visuals', href: '/visualisation.html'},
     {key: 'risks', label: 'Risks', href: '/risks.html', requireAny: ['is_admin', 'can_view_risks', 'can_manage_risks']},
     {key: 'audits', label: 'Audits', href: '/audits.html', requireAny: ['is_admin', 'can_view_audits', 'can_manage_audits']},
     {key: 'diary', label: 'Diary', href: '/events.html?source=diary', requireAny: ['is_admin']},
