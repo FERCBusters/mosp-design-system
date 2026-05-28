@@ -246,7 +246,17 @@ export function initCollapsibleFilterSections(cfgOverrides = null) {
     const toggle = _ensureFilterToggle(section, header);
     const storageKey = _collapseStorageKey(cfg, section);
     const initiallyCollapsed = (() => {
-      try { return localStorage.getItem(storageKey) === '1'; } catch { return false; }
+      const attr = String(section.dataset.mospFilterDefault || section.dataset.mospDefaultCollapsed || '').trim().toLowerCase();
+      // Filters are intentionally collapsed by default so content/results remain prominent on page load.
+      // Individual pages can opt out with data-mosp-filter-default="expanded".
+      const defaultCollapsed = !(attr === 'expanded' || attr === 'open' || attr === 'false' || attr === '0');
+      try {
+        const saved = localStorage.getItem(storageKey);
+        if (saved === null || saved === undefined) return defaultCollapsed;
+        return saved === '1';
+      } catch {
+        return defaultCollapsed;
+      }
     })();
     _setFilterCollapsed(section, body, toggle, initiallyCollapsed);
 
