@@ -136,6 +136,16 @@
   border-bottom: 0;
 }
 
+[data-mosp-filter-section].mosp-filter-collapsed [data-mosp-filter-body],
+[data-mosp-filter-section].mosp-filter-collapsed [data-mosp-filter-collapse-target="1"] {
+  display: none !important;
+}
+
+[data-mosp-filter-section].mosp-filter-collapsed [data-mosp-filter-body].border-bottom,
+[data-mosp-filter-section].mosp-filter-collapsed [data-mosp-filter-collapse-target="1"].border-bottom {
+  border-bottom: 0 !important;
+}
+
 
 .viz-zoom-controls {
   position: absolute;

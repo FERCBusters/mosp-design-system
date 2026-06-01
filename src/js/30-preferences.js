@@ -173,14 +173,49 @@ export async function persistStickyEnabled(enabled, cfgOverrides = null) {
 }
 
 /**
+ * Return the elements that should be hidden when a filter section is collapsed.
+ */
+function _filterBodiesForSection(section) {
+  if (!section) return [];
+
+  const explicit = Array.from(section.querySelectorAll('[data-mosp-filter-body]'));
+  if (explicit.length) return explicit;
+
+  const fallback = section.querySelector(':scope > .card-body') ||
+    section.querySelector('form') ||
+    section.querySelector('.collapse.show, .collapse');
+  if (fallback) {
+    fallback.setAttribute('data-mosp-filter-collapse-target', '1');
+    return [fallback];
+  }
+  return [];
+}
+
+/**
  * Apply collapsed/expanded state to a filter section and its toggle.
  */
-function _setFilterCollapsed(section, body, toggle, collapsed) {
-  if (!section || !body) return;
+function _setFilterCollapsed(section, bodies, toggle, collapsed) {
+  const targets = Array.isArray(bodies) ? bodies : [bodies].filter(Boolean);
+  if (!section || !targets.length) return;
+
   section.classList.toggle('mosp-filter-collapsed', !!collapsed);
-  body.hidden = !!collapsed;
-  body.style.display = collapsed ? 'none' : '';
+  section.classList.toggle('mosp-filter-expanded', !collapsed);
+  for (const body of targets) {
+    body.hidden = !!collapsed;
+    if (collapsed) {
+      // Bootstrap display utilities such as .d-flex use !important. Use an
+      // important inline declaration so collapsed filters really disappear.
+      body.style.setProperty('display', 'none', 'important');
+      body.classList.remove('show');
+      body.style.height = '';
+    } else {
+      body.style.removeProperty('display');
+      body.classList.add('show');
+    }
+  }
+
   if (toggle) {
+    toggle.classList.toggle('collapsed', !!collapsed);
     toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
     const label = toggle.querySelector('[data-mosp-filter-toggle-label]');
     if (label) label.textContent = collapsed ? EXPAND_LABEL : COLLAPSE_LABEL;
@@ -190,28 +225,41 @@ function _setFilterCollapsed(section, body, toggle, collapsed) {
       icon.classList.toggle('bi-chevron-up', !collapsed);
     }
   }
+
+  try { window.dispatchEvent(new Event('resize')); } catch {}
 }
 
 /**
  * Ensure a filter section header contains a shared Show/Hide filters toggle.
  */
-function _ensureFilterToggle(section, header) {
+function _ensureFilterToggle(section, header, body = null) {
   if (!header) return null;
   let toggle = section.querySelector('[data-mosp-filter-toggle]');
-  if (toggle) return toggle;
+  if (!toggle) {
+    toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'btn btn-sm btn-outline-secondary';
+    toggle.setAttribute('data-mosp-filter-toggle', '1');
+    toggle.innerHTML = `<i class="bi bi-chevron-up" aria-hidden="true"></i><span data-mosp-filter-toggle-label>${COLLAPSE_LABEL}</span>`;
 
-  toggle = document.createElement('button');
-  toggle.type = 'button';
-  toggle.className = 'btn btn-sm btn-outline-secondary';
-  toggle.setAttribute('data-mosp-filter-toggle', '1');
-  toggle.innerHTML = `<i class="bi bi-chevron-up" aria-hidden="true"></i><span data-mosp-filter-toggle-label>${COLLAPSE_LABEL}</span>`;
-
-  const maybeTitle = header.querySelector('.fw-bold, .fw-semibold, h2, h3, h4, h5, h6, span');
-  if (!header.classList.contains('d-flex')) {
-    header.classList.add('d-flex', 'align-items-center', 'justify-content-between', 'gap-2', 'flex-wrap');
-    if (maybeTitle && maybeTitle.parentElement === header) maybeTitle.classList.add('mb-0');
+    const maybeTitle = header.querySelector('.fw-bold, .fw-semibold, h2, h3, h4, h5, h6, span');
+    if (!header.classList.contains('d-flex')) {
+      header.classList.add('d-flex', 'align-items-center', 'justify-content-between', 'gap-2', 'flex-wrap');
+      if (maybeTitle && maybeTitle.parentElement === header) maybeTitle.classList.add('mb-0');
+    }
+    header.appendChild(toggle);
   }
-  header.appendChild(toggle);
+
+  if (body) {
+    if (!body.id) {
+      const key = String(section.dataset.mospFilterSection || 'filters')
+        .toLowerCase()
+        .replace(/[^a-z0-9_-]+/g, '-')
+        .replace(/^-+|-+$/g, '') || 'filters';
+      body.id = `mosp-${key}-body`;
+    }
+    toggle.setAttribute('aria-controls', body.id);
+  }
   return toggle;
 }
 
@@ -240,10 +288,11 @@ export function initCollapsibleFilterSections(cfgOverrides = null) {
 
   sections.forEach((section) => {
     const header = _ensureFilterHeader(section);
-    const body = section.querySelector('[data-mosp-filter-body]') || section.querySelector(':scope > .card-body') || section.querySelector('form');
+    const bodies = _filterBodiesForSection(section);
+    const body = bodies[0] || null;
     if (!body) return;
 
-    const toggle = _ensureFilterToggle(section, header);
+    const toggle = _ensureFilterToggle(section, header, body);
     const storageKey = _collapseStorageKey(cfg, section);
     const initiallyCollapsed = (() => {
       const attr = String(section.dataset.mospFilterDefault || section.dataset.mospDefaultCollapsed || '').trim().toLowerCase();
@@ -258,22 +307,27 @@ export function initCollapsibleFilterSections(cfgOverrides = null) {
         return defaultCollapsed;
       }
     })();
-    _setFilterCollapsed(section, body, toggle, initiallyCollapsed);
+    _setFilterCollapsed(section, bodies, toggle, initiallyCollapsed);
 
-    toggle?.addEventListener('click', async () => {
-      const nextCollapsed = !(section.classList.contains('mosp-filter-collapsed'));
-      _setFilterCollapsed(section, body, toggle, nextCollapsed);
-      try { localStorage.setItem(storageKey, nextCollapsed ? '1' : '0'); } catch {}
+    if (toggle && toggle.dataset.mospFilterToggleWired !== '1') {
+      toggle.dataset.mospFilterToggleWired = '1';
+      toggle.addEventListener('click', async (ev) => {
+        ev.preventDefault();
+        const nextCollapsed = !(section.classList.contains('mosp-filter-collapsed'));
+        const currentBodies = _filterBodiesForSection(section);
+        _setFilterCollapsed(section, currentBodies, toggle, nextCollapsed);
+        try { localStorage.setItem(storageKey, nextCollapsed ? '1' : '0'); } catch {}
 
-      if (nextCollapsed && getStickyEnabled(cfg, false)) {
-        try {
-          await persistStickyEnabled(false, cfg);
-        } catch {
-          setStickyEnabled(false, cfg);
-          _setStickyCheckbox(false);
+        if (nextCollapsed && getStickyEnabled(cfg, false)) {
+          try {
+            await persistStickyEnabled(false, cfg);
+          } catch {
+            setStickyEnabled(false, cfg);
+            _setStickyCheckbox(false);
+          }
         }
-      }
-    });
+      });
+    }
   });
 }
 
