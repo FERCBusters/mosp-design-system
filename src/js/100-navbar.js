@@ -27,6 +27,47 @@ function _hasAll(me, keys) {
   return true;
 }
 
+function _featureAllowed(me, cfgFragment) {
+  return _hasAny(me, cfgFragment?.requireAny) && _hasAll(me, cfgFragment?.requireAll);
+}
+
+function _meCacheKey(cfg) {
+  const app = String(cfg.appId || 'app').replace(/[^A-Za-z0-9_.:-]/g, '_');
+  const ep = String(cfg.auth?.meEndpoint || '').replace(/[^A-Za-z0-9_.:/?-]/g, '_');
+  return `mosp:${app}:me:${ep}`;
+}
+
+function _readCachedMe(cfg) {
+  const ttl = Number(cfg.auth?.meCacheMs || 0);
+  if (!ttl || ttl <= 0 || typeof sessionStorage === 'undefined') return null;
+  try {
+    const raw = sessionStorage.getItem(_meCacheKey(cfg));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || !parsed.data || !parsed.ts) return null;
+    if ((Date.now() - Number(parsed.ts || 0)) > ttl) return null;
+    return parsed.data;
+  } catch {
+    return null;
+  }
+}
+
+function _writeCachedMe(cfg, me) {
+  const ttl = Number(cfg.auth?.meCacheMs || 0);
+  if (!ttl || ttl <= 0 || typeof sessionStorage === 'undefined') return;
+  try {
+    sessionStorage.setItem(_meCacheKey(cfg), JSON.stringify({ts: Date.now(), data: me || null}));
+  } catch {
+    // ignore storage quota/private-mode errors
+  }
+}
+
+export function clearCachedMe(cfgOverrides = null) {
+  const cfg = getUiConfig(cfgOverrides);
+  if (typeof sessionStorage === 'undefined') return;
+  try { sessionStorage.removeItem(_meCacheKey(cfg)); } catch {}
+}
+
 /**
  * Resolve a config value that may be a static value or a function of user/config.
  */
@@ -121,9 +162,7 @@ function _initNavDensity(mount, onAfterApply = null) {
 export function renderNavbar(active = '', me = null, cfgOverrides = null) {
   const cfg = getUiConfig(cfgOverrides);
 
-  const links = (cfg.links || []).filter((lnk) => {
-    return _hasAny(me, lnk.requireAny) && _hasAll(me, lnk.requireAll);
-  });
+  const links = (cfg.links || []).filter((lnk) => _featureAllowed(me, lnk));
 
   const linkHtml = links.map((lnk) => {
     const label = String(_resolveMaybeFn(lnk.label, me, cfg) || '').trim() || 'Link';
@@ -147,11 +186,12 @@ export function renderNavbar(active = '', me = null, cfgOverrides = null) {
       </div>
   ` : '';
 
+  const searchAllowed = !!cfg.search.enabled && _featureAllowed(me, cfg.search);
   const searchLabel = esc(cfg.search.label || 'Search');
   const searchPlaceholder = esc(cfg.search.placeholder || 'Search');
   const searchDatalist = cfg.search.datalistId ? `list="${esc(cfg.search.datalistId)}"` : '';
   const searchDatalistHtml = cfg.search.datalistId ? `<datalist id="${esc(cfg.search.datalistId)}"></datalist>` : '';
-  const searchBlock = cfg.search.enabled ? `
+  const searchBlock = searchAllowed ? `
       <div class="me-2 mosp-nav-search">
         <button class="btn btn-sm btn-light mosp-nav-search-button" id="navSearchOpen" type="button" data-bs-toggle="modal" data-bs-target="#navSearchModal" aria-label="${searchLabel}" title="${searchLabel}">
           <i class="bi bi-search" aria-hidden="true"></i>
@@ -160,7 +200,7 @@ export function renderNavbar(active = '', me = null, cfgOverrides = null) {
       </div>
   ` : '';
 
-  const searchModalBlock = cfg.search.enabled ? `
+  const searchModalBlock = searchAllowed ? `
 <div class="modal fade mosp-search-modal" id="navSearchModal" tabindex="-1" aria-labelledby="navSearchModalTitle" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <form class="modal-content" role="search" id="navSearchForm">
@@ -327,8 +367,14 @@ export async function initNavbar(cfgOverrides = null) {
 
   const active = document.body?.dataset?.page || '';
 
-  // Ask backend who the current user is.
-  let me = await apiGet(cfg.auth.meEndpoint, cfg);
+  // Ask backend who the current user is. Use a short-lived per-tab cache so
+  // ordinary page-to-page navigation does not refetch the same /me payload for
+  // every navbar render. Backend route permissions remain authoritative.
+  let me = _readCachedMe(cfg);
+  if (!me) {
+    me = await apiGet(cfg.auth.meEndpoint, cfg);
+    _writeCachedMe(cfg, me);
+  }
 
   // Optional shape mapping
   if (typeof cfg.mapMe === 'function') {
@@ -382,12 +428,13 @@ export async function initNavbar(cfgOverrides = null) {
   }
 
   // Datalist autocomplete (optional)
-  if (cfg.search.enabled && cfg.search.datalistEndpoint) {
+  const searchAllowed = !!cfg.search.enabled && _featureAllowed(me, cfg.search);
+  if (searchAllowed && cfg.search.datalistEndpoint) {
     await _loadDatalist(cfg);
   }
 
   // Search form wiring
-  if (cfg.search.enabled) {
+  if (searchAllowed) {
     const form = document.getElementById('navSearchForm');
     const inp = document.getElementById('navSearch');
     const qKey = cfg.search.queryParam || 'q';
@@ -452,6 +499,7 @@ export async function initNavbar(cfgOverrides = null) {
         return;
       }
 
+      clearCachedMe(cfg);
       try { await apiPost(cfg.auth.logoutEndpoint, {}, {}, cfg); } catch {}
       location.href = String(me?.logout_redirect || '').trim() || cfg.auth.logoutRedirect || cfg.auth.loginUrl || '/login.html';
     });

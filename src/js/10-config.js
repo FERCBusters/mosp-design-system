@@ -18,8 +18,8 @@ const DEFAULT_CONFIG = {
   links: [
     {key: 'controls', label: 'Controls', href: '/controls.html'},
     {key: 'clauses', label: 'Clauses', href: '/clauses.html'},
-    {key: 'events', label: 'Events', href: '/events.html'},
-    {key: 'sources', label: 'Sources', href: '/sources.html'},
+    {key: 'events', label: 'Events', href: '/events.html', requireAny: ['is_admin', 'can_view_events']},
+    {key: 'sources', label: 'Sources', href: '/sources.html', requireAny: ['is_admin', 'can_view_events']},
     {key: 'risks', label: 'Risks', href: '/risks.html', requireAny: ['is_admin', 'can_view_risks', 'can_manage_risks']},
     {key: 'audits', label: 'Audits', href: '/audits.html', requireAny: ['is_admin', 'can_view_audits', 'can_manage_audits']},
     {key: 'diary', label: 'Diary', href: '/events.html?source=diary', requireAny: ['is_admin']},
@@ -52,6 +52,7 @@ const DEFAULT_CONFIG = {
     datalistUrlKey: 'url',
     // If true, submitting a search that matches a datalist "name" jumps to its URL
     resolveNamesToUrls: true,
+    requireAny: ['is_admin', 'can_view_events'],
   },
   // Saved shortcuts dropdown in navbar ("Save this view")
   shortcuts: {
@@ -93,6 +94,10 @@ const DEFAULT_CONFIG = {
     logoutEnabled: true,
     accountHref: '/account.html',
     accountEnabled: true,
+    // Short-lived sessionStorage cache for /me. Backend permissions remain
+    // authoritative; this only avoids refetching the navbar identity on each
+    // page navigation in the same tab.
+    meCacheMs: 60000,
   },
   csrf: {
     cookieName: 'keen_csrf',
