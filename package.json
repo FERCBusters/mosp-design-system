@@ -1,7 +1,7 @@
 {
   "name": "@FERCBusters/mosp-design-system",
   "version": "0.1.0",
-  "description": "Shared UI shell + helpers (Bootstrap + D3-friendly) standardised across Mydex Open Source Projects.",
+  "description": "Shared UI shell + helpers (Bootstrap + D3-friendly) standardised across FERCBusters Open Source Projects.",
   "type": "module",
   "main": "./dist/app.js",
   "module": "./dist/app.js",
@@ -12,7 +12,7 @@
     "LICENSE",
     "scripts"
   ],
-  "license": "MIT",
+  "license": "Apache-2.0",
   "scripts": {
     "build": "node scripts/build.mjs",
     "prepack": "npm run build"
