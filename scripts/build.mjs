@@ -23,7 +23,6 @@ const jsParts = [
   "120-table-sorting.js",
   "130-toast.js",
   "140-auto-apply-controls.js",
-  "150-statistics-filters.js",
   "160-date-ranges.js",
   "170-taxonomy-pills.js",
 ];

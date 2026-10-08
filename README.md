@@ -1,4 +1,4 @@
-# @mydex/mosp-design-system
+# @FERCBusters/mosp-design-system
 
 A small shared UI "shell" + helper library designed to be used across various Mydex Open Source projects.
 
@@ -132,7 +132,7 @@ const me = await initNavbar();
 ### Option A — npm dependency via git
 In each app's UI build directory:
 - add dependency:
-  - `"@mydex/mosp-design-system": "git+ssh://git@github.com/Mydex/mosp-design-system.git#dev"`
+  - `"@FERCBusters/mosp-design-system": "git+ssh://git@github.com/Mydex/mosp-design-system.git#dev"`
 
 - add a build/copy step to place `dist/` into `services/ui/public/vendor/mosp-design-system/`.
 
