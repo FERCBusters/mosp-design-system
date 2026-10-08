@@ -22,6 +22,17 @@
   pointer-events: none;
 }
 
+/*
+ * Readable labels for graphs that use generic .node groups on light
+ * canvases.
+ */
+.mosp-readable-node-labels .node:not(.node-source):not(.node-control):not(.node-dark) text {
+  fill: var(--mosp-graph-label-color, var(--keen-ink, #1f1f2a));
+  stroke: var(--mosp-graph-label-halo, var(--bs-body-bg, #fff));
+  stroke-width: var(--mosp-graph-label-halo-width, 4px);
+  stroke-linejoin: round;
+}
+
 /* Bigger labels for Source boxes only */
 .node-source text {
   font-size: 15px;

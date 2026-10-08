@@ -109,6 +109,18 @@ body.keen-sticky-disabled .keen-sticky-topblock {
   stroke-linejoin: round;
 }
 
+.graph.mosp-readable-node-labels svg text {
+  stroke: var(--mosp-graph-label-halo, var(--bs-body-bg, #fff));
+  stroke-width: var(--mosp-graph-label-halo-width, 4px);
+}
+
+.graph.mosp-readable-node-labels .node-source text,
+.graph.mosp-readable-node-labels .node-control text,
+.graph.mosp-readable-node-labels .node-dark text {
+  stroke: rgba(0,0,0,0.35);
+  stroke-width: 0.8px;
+}
+
 .visual-controls {
   display: flex;
   flex-wrap: wrap;

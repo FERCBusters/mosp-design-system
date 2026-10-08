@@ -175,3 +175,23 @@
 }
 .viz-zoom-btn:hover { background: rgba(15, 23, 42, 0.05); }
 .viz-zoom-btn-reset { min-width: auto; font-size: 0.78rem; }
+
+/* Dark appearance retains each theme's accent while replacing light surfaces. */
+:root[data-bs-theme=dark]{color-scheme:dark;--keen-ink:#edf0f6;--keen-muted:#b7bfce;--bs-body-color:#edf0f6;--bs-body-color-rgb:237,240,246;--bs-body-bg:#141820;--bs-body-bg-rgb:20,24,32;--bs-secondary-bg:#202631;--bs-tertiary-bg:#29313e;--bs-border-color:#465061;--bs-emphasis-color:#fff;--keen-accent-100:color-mix(in srgb,var(--keen-accent) 20%,#202631);--bs-link-color:color-mix(in srgb,var(--keen-accent) 55%,white);--bs-link-hover-color:color-mix(in srgb,var(--keen-accent) 35%,white)}
+:root[data-bs-theme=dark] body{background:var(--bs-body-bg);color:var(--bs-body-color)}
+:root[data-bs-theme=dark] :is(.card,.modal-content,.dropdown-menu,.list-group-item,.keen-multiselect-wrap){background:var(--bs-secondary-bg);color:var(--bs-body-color);border-color:var(--bs-border-color)}
+:root[data-bs-theme=dark] :is(.card-header,.card-footer,.table-loading-row td){background:var(--bs-tertiary-bg);color:var(--bs-body-color);border-color:var(--bs-border-color)}
+:root[data-bs-theme=dark] :is(.form-control,.form-select){background-color:var(--bs-body-bg);color:var(--bs-body-color);border-color:var(--bs-border-color)}
+:root[data-bs-theme=dark] .form-control::placeholder{color:var(--keen-muted)}
+:root[data-bs-theme=dark] :is(.small-muted,.text-muted){color:var(--keen-muted)!important}
+:root[data-bs-theme=dark] :is(.bg-white,.bg-light){background-color:var(--bs-secondary-bg)!important}
+:root[data-bs-theme=dark] :is(.text-dark,.link-dark){color:var(--bs-body-color)!important}
+:root[data-bs-theme=dark] .table{--bs-table-bg:var(--bs-secondary-bg);--bs-table-color:var(--bs-body-color);--bs-table-border-color:var(--bs-border-color);--bs-table-hover-bg:var(--bs-tertiary-bg);--bs-table-hover-color:var(--bs-body-color)}
+:root[data-bs-theme=dark] .btn-outline-primary{--bs-btn-color:var(--bs-link-color);--bs-btn-border-color:var(--bs-link-color)}
+:root[data-bs-theme=dark] .navbar-keen .form-control{background:var(--bs-body-bg);color:var(--bs-body-color)}
+
+:root[data-bs-theme=dark] .table thead th{color:var(--bs-body-color)}
+
+:root[data-bs-theme=dark] .kpi{background:var(--bs-secondary-bg);border-color:var(--bs-border-color);color:var(--bs-body-color)}
+:root[data-bs-theme=dark] .kpi .label{color:var(--keen-muted)}
+:root[data-bs-theme=dark] .kpi .value{color:var(--bs-emphasis-color)}

@@ -36,8 +36,12 @@ body.print-view .no-print {
 .navbar-keen .keen-brand-icon {
   height: 28px;
   width: auto;
-  filter: brightness(0) invert(1) drop-shadow(0 1px 1px rgba(0,0,0,0.35));
-  opacity: 0.95;
+  filter: none;
+  background: #fff;
+  border-radius: 9px;
+  padding: 3px;
+  box-shadow: 0 1px 4px #0002;
+  opacity: 1;
 }
 
 .navbar-keen .container-fluid { gap: 0.25rem; }
