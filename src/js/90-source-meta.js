@@ -89,7 +89,9 @@ export function sourceBadgeHtml(source, metaMap, href = null) {
   if (rgb) style += `--src-rgb: ${esc(rgb)};`;
   if (lum !== null && lum > 0.70) style += `color: #111827; border-color: rgba(0,0,0,0.14);`;
   style = style ? ` style="${style}"` : '';
-  const url = withFramework(href || `/events.html?source=${encodeURIComponent(s)}`);
+  const url =
+    safeExternalHref(withFramework(href || `/events.html?source=${encodeURIComponent(s)}`)) ||
+    '#';
   const title = (m && m.label && m.label !== s) ? ` title="${esc(s)}"` : '';
   return `<a class="badge badge-source"${style}${title} href="${esc(url)}">${label}</a>`;
 }

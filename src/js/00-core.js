@@ -59,11 +59,16 @@ export function collapseToggleButtonHtml({
 
 /**
  * Validate a user- or API-provided URL before placing it in an href attribute.
+ *
+ * Same-origin paths are allowed, but browsers read a backslash as "/" and drop
+ * tabs and newlines while parsing, so "/" followed by either can resolve to
+ * another host. HTML escaping does not make a URL safe; call this before esc().
  */
 export function safeExternalHref(url) {
   const raw = String(url ?? '').trim();
   if (!raw) return '';
   if (raw.length > 2048) return '';
+  if (/[\\\u0000-\u001f\u007f]/.test(raw)) return '';
   if (/^(?:javascript|data|vbscript):/i.test(raw)) return '';
   // Disallow protocol-relative URLs like //evil.com.
   if (/^\/\//.test(raw)) return '';

@@ -60,8 +60,9 @@ async function _loadShortcuts(cfg) {
 
     for (const it of items) {
       const name = String(it?.name || '').trim();
-      const url = String(it?.url || '').trim();
+      const url = safeExternalHref(it?.url);
       const id = it?.id ?? it?.shortcut_id ?? null;
+      // A saved URL that fails validation is never used as a link destination.
       if (!name || !url) continue;
 
       const li = document.createElement('li');
@@ -73,7 +74,7 @@ async function _loadShortcuts(cfg) {
       a.style.whiteSpace = 'nowrap';
       a.style.overflow = 'hidden';
       a.style.textOverflow = 'ellipsis';
-      a.href = safeExternalHref(url) || url;
+      a.href = url;
       a.textContent = name;
 
       row.appendChild(a);
