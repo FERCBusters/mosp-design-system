@@ -113,6 +113,13 @@ function _applyFrameworkToNavLinks(framework, cfg) {
 /**
  * Load available frameworks from the configured API endpoint and cache the result.
  */
+// Expose the successful initial response so app-specific navigation can reuse
+// metadata omitted by the normalised picker. Explicit refreshes remain separate.
+let _loadedFrameworkCatalog = null;
+export function getLoadedFrameworkCatalog() {
+  return _loadedFrameworkCatalog;
+}
+
 async function _fetchFrameworks(cfg) {
   if (_frameworkCache) return _frameworkCache;
   if (_frameworkPromise) return _frameworkPromise;
@@ -120,6 +127,7 @@ async function _fetchFrameworks(cfg) {
   _frameworkPromise = (async () => {
     try {
       const data = await apiGet(cfg.framework.endpoint, cfg);
+      _loadedFrameworkCatalog = data;
       const rawItems = Array.isArray(data?.items) ? data.items : (Array.isArray(data) ? data : []);
       const items = rawItems
         .map((it) => ({

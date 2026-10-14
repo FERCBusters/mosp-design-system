@@ -139,3 +139,18 @@ In each app's UI build directory:
 ### Option B — git submodule
 - Add the UI kit as a submodule into each repo (e.g. `vendor/mosp-design-system/`)
 - Copy `dist/*` into `public/vendor/mosp-design-system/` during build/deploy.
+
+### Navbar startup data
+
+Navbar autocomplete and shortcuts share their initial saved-search result when
+configured with the same endpoint. Saving or deleting a shortcut still refreshes
+the list from the API. A failed autocomplete request allows shortcuts to retry.
+
+`getLoadedFrameworkCatalog()` returns the original successful framework-picker
+response, including application-specific metadata, or `null` before it is loaded.
+Applications can reuse it after `initNavbar()` to render additional navigation
+without requesting the catalogue again. Explicit refreshes remain the caller's
+responsibility. The response stays in memory for the current document.
+
+Run `npm test` for the navbar data regression checks and `npm run build` to build
+the distributed assets.

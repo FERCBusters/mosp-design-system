@@ -429,8 +429,9 @@ export async function initNavbar(cfgOverrides = null) {
 
   // Datalist autocomplete (optional)
   const searchAllowed = !!cfg.search.enabled && _featureAllowed(me, cfg.search);
+  let initialSavedSearches = null;
   if (searchAllowed && cfg.search.datalistEndpoint) {
-    await _loadDatalist(cfg);
+    initialSavedSearches = await _loadDatalist(cfg);
   }
 
   // Search form wiring
@@ -507,7 +508,8 @@ export async function initNavbar(cfgOverrides = null) {
 
   // Shortcuts dropdown
   if (cfg.shortcuts.enabled) {
-    await _loadShortcuts(cfg);
+    const sameEndpoint = String(cfg.search.datalistEndpoint || '').trim() === String(cfg.shortcuts.endpoint || '').trim();
+    await _loadShortcuts(cfg, sameEndpoint ? initialSavedSearches : null);
     refreshNavLayout();
   }
 

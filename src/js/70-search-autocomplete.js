@@ -51,7 +51,7 @@ export function attachSavedSearchAutocomplete(inputEl, datalistId = null) {
 async function _loadDatalist(cfg) {
   const id = cfg.search.datalistId || 'mospSavedSearches';
   const listEl = document.getElementById(id);
-  if (!listEl) return [];
+  if (!listEl) return null;
 
   listEl.innerHTML = '';
   _savedByName = new Map();
@@ -79,6 +79,6 @@ async function _loadDatalist(cfg) {
     }
     return arr;
   } catch {
-    return [];
+    return null;
   }
 }

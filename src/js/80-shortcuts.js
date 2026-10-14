@@ -8,7 +8,7 @@
 /**
  * Load and render the navbar shortcuts dropdown, including save and delete actions.
  */
-async function _loadShortcuts(cfg) {
+async function _loadShortcuts(cfg, initialItems = null) {
   const menu = document.getElementById('navShortcutsMenu');
   if (!menu) return;
 
@@ -105,7 +105,7 @@ async function _loadShortcuts(cfg) {
   };
 
   try {
-    const data = await apiGet(ep, cfg);
+    const data = initialItems ?? await apiGet(ep, cfg);
     const items = Array.isArray(data?.items) ? data.items : (Array.isArray(data) ? data : []);
     render(items);
   } catch {
