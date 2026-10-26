@@ -70,6 +70,40 @@ async function readError(res) {
   }
 }
 
+const GENERIC_ERROR_TEXT =
+  'Something went wrong. Try again, and check your connection if it keeps happening.';
+
+/**
+ * A readable, user-facing message for a caught error. Server failures
+ * surface their own public detail (including when the body is a JSON
+ * document); network and aborted transfers get plain language instead of a
+ * browser exception.
+ */
+export function errorText(err) {
+  let raw = '';
+  if (err instanceof Error) raw = err.message || '';
+  else if (err && typeof err === 'object') raw = err.message || err.detail || '';
+  else raw = String(err || '');
+  raw = String(raw).trim();
+  if (raw.startsWith('{') || raw.startsWith('[')) {
+    try {
+      const parsed = JSON.parse(raw);
+      raw = parsed?.detail || parsed?.error || parsed?.message || '';
+    } catch {
+      // Keep the original text; a non-JSON document may still be readable.
+    }
+    raw = String(raw).trim();
+  }
+  raw = raw.replace(/^Error:\s*/i, '').trim();
+  if (/^failed to fetch$/i.test(raw) || /^networkerror/i.test(raw)) {
+    return 'Network problem. Check your connection and try again.';
+  }
+  if (!raw) return GENERIC_ERROR_TEXT;
+  raw = raw.replace(/\s+/g, ' ').trim();
+  if (raw.length > 240) raw = `${raw.slice(0, 239)}…`;
+  return raw || GENERIC_ERROR_TEXT;
+}
+
 /**
  * Fetch JSON from an API endpoint with shared authentication handling.
  */

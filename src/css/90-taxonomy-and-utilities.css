@@ -26,7 +26,7 @@
 
 .capability-pills-browser {
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 8px;
   background: var(--panel-2);
   padding: 10px;
   max-height: 520px;
@@ -58,7 +58,7 @@
   width: 24px;
   height: 24px;
   padding: 0;
-  border-radius: 8px;
+  border-radius: 6px;
   border: 1px solid var(--border);
   background: var(--bs-body-bg, #fff);
   cursor: pointer;
@@ -176,8 +176,11 @@
 .viz-zoom-btn:hover { background: rgba(15, 23, 42, 0.05); }
 .viz-zoom-btn-reset { min-width: auto; font-size: 0.78rem; }
 
-/* Dark appearance retains each theme's accent while replacing light surfaces. */
-:root[data-bs-theme=dark]{color-scheme:dark;--keen-ink:#edf0f6;--keen-muted:#b7bfce;--bs-body-color:#edf0f6;--bs-body-color-rgb:237,240,246;--bs-body-bg:#141820;--bs-body-bg-rgb:20,24,32;--bs-secondary-bg:#202631;--bs-tertiary-bg:#29313e;--bs-border-color:#465061;--bs-emphasis-color:#fff;--keen-accent-100:color-mix(in srgb,var(--keen-accent) 20%,#202631);--bs-link-color:color-mix(in srgb,var(--keen-accent) 55%,white);--bs-link-hover-color:color-mix(in srgb,var(--keen-accent) 35%,white)}
+/* Dark appearance retains each theme's accent while replacing light surfaces.
+   The default dark surfaces are the warm Sand family; Ink re-pins its cool
+   family in the block beneath. */
+:root[data-bs-theme=dark]{color-scheme:dark;--keen-ink:#f2ede2;--keen-muted:#b6ae9e;--bs-body-color:#f2ede2;--bs-body-color-rgb:242,237,226;--bs-body-bg:#191611;--bs-body-bg-rgb:25,22,17;--bs-secondary-bg:#262117;--bs-tertiary-bg:#322c20;--bs-border-color:#4c4434;--bs-emphasis-color:#fff;--keen-accent-100:color-mix(in srgb,var(--keen-accent) 20%,#262117);--bs-link-color:color-mix(in srgb,var(--keen-accent) 55%,white);--bs-link-hover-color:color-mix(in srgb,var(--keen-accent) 35%,white)}
+:root[data-bs-theme=dark][data-theme=ink]{--keen-ink:#edf0f6;--keen-muted:#b7bfce;--bs-body-color:#edf0f6;--bs-body-color-rgb:237,240,246;--bs-body-bg:#141820;--bs-body-bg-rgb:20,24,32;--bs-secondary-bg:#202631;--bs-tertiary-bg:#29313e;--bs-border-color:#465061;--keen-accent-100:color-mix(in srgb,var(--keen-accent) 20%,#202631)}
 :root[data-bs-theme=dark] body{background:var(--bs-body-bg);color:var(--bs-body-color)}
 :root[data-bs-theme=dark] :is(.card,.modal-content,.dropdown-menu,.list-group-item,.keen-multiselect-wrap){background:var(--bs-secondary-bg);color:var(--bs-body-color);border-color:var(--bs-border-color)}
 :root[data-bs-theme=dark] :is(.card-header,.card-footer,.table-loading-row td){background:var(--bs-tertiary-bg);color:var(--bs-body-color);border-color:var(--bs-border-color)}
@@ -186,7 +189,36 @@
 :root[data-bs-theme=dark] :is(.small-muted,.text-muted){color:var(--keen-muted)!important}
 :root[data-bs-theme=dark] :is(.bg-white,.bg-light){background-color:var(--bs-secondary-bg)!important}
 :root[data-bs-theme=dark] :is(.text-dark,.link-dark){color:var(--bs-body-color)!important}
+/* The vertical admin/account rail compiles a translucent white panel that
+   stays pale over the dark canvas and washes its item text out; bind the rail
+   and its active item to the theme surfaces instead. */
+:root[data-bs-theme=dark] .admin-tab-nav{background:var(--bs-secondary-bg);border-color:var(--bs-border-color);box-shadow:none;color:var(--bs-body-color)}
+:root[data-bs-theme=dark] .admin-tab-nav .nav-link.active{color:var(--bs-link-color)}
+/* Elevation shadows are dialled for the light canvas; on dark canvases the
+   same tints render as slightly darker square panels behind rounded corners,
+   so dark surfaces stay flat. */
+:root[data-bs-theme=dark] :is(.card,[data-mosp-filter-section],[data-mosp-viz-section]){box-shadow:none}
 :root[data-bs-theme=dark] .table{--bs-table-bg:var(--bs-secondary-bg);--bs-table-color:var(--bs-body-color);--bs-table-border-color:var(--bs-border-color);--bs-table-hover-bg:var(--bs-tertiary-bg);--bs-table-hover-color:var(--bs-body-color)}
+/* Accent-tinted chips and badges: keep the wash but lift ink/labels so the
+   count numbers and labels stay readable on dark panels. */
+:root[data-bs-theme=dark] :is(.badge-soft,.badge-source,.badge-chip){
+  color:color-mix(in srgb,rgb(var(--keen-accent-rgb)) 55%,white);
+  border-color:color-mix(in srgb,rgb(var(--keen-accent-rgb)) 38%,transparent);
+}
+:root[data-bs-theme=dark] .badge-source{color:color-mix(in srgb,rgb(var(--src-rgb)) 55%,white);border-color:color-mix(in srgb,rgb(var(--src-rgb)) 38%,transparent)}
+:root[data-bs-theme=dark] .badge-chip{color:var(--bs-body-color)}
+/* Tabs: bind the Bootstrap tab strip to theme tokens so the active tab sits
+   on the canvas instead of punching a boxed strip through dark mode. */
+.nav-tabs{
+  --bs-nav-tabs-border-color:rgba(var(--keen-accent-rgb),0.18);
+  --bs-nav-tabs-link-active-color:var(--keen-accent-700);
+  --bs-nav-tabs-link-active-bg:transparent;
+  --bs-nav-tabs-link-active-border-color:rgba(var(--keen-accent-rgb),0.18) rgba(var(--keen-accent-rgb),0.18) transparent;
+  --bs-nav-tabs-link-hover-border-color:rgba(var(--keen-accent-rgb),0.10) rgba(var(--keen-accent-rgb),0.10) rgba(var(--keen-accent-rgb),0.18);
+}
+:root[data-bs-theme=dark] .nav-tabs{
+  --bs-nav-tabs-link-active-color:color-mix(in srgb,rgb(var(--keen-accent-rgb)) 55%,white);
+}
 :root[data-bs-theme=dark] .btn-outline-primary{--bs-btn-color:var(--bs-link-color);--bs-btn-border-color:var(--bs-link-color)}
 :root[data-bs-theme=dark] .navbar-keen .form-control{background:var(--bs-body-bg);color:var(--bs-body-color)}
 

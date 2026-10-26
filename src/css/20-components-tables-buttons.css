@@ -5,15 +5,15 @@
 
 .card {
   /* Keep Bootstrap card parts (header/footer/images) aligned to our larger radius */
-  --bs-card-border-radius: 18px;
-  --bs-card-inner-border-radius: calc(18px - var(--bs-card-border-width, 1px));
+  --bs-card-border-radius: 10px;
+  --bs-card-inner-border-radius: calc(10px - var(--bs-card-border-width, 1px));
   border: 1px solid rgba(var(--keen-accent-rgb),0.20);
-  border-radius: 18px;
+  border-radius: 10px;
   box-shadow: 0 10px 30px rgba(20, 20, 40, 0.06);
 }
 .card-header {
-  background: linear-gradient(180deg, rgba(var(--keen-accent-rgb),0.10) 0%, rgba(var(--keen-accent-rgb),0.02) 100%);
-  border-bottom: 1px solid rgba(var(--keen-accent-rgb),0.18);
+  background: transparent;
+  border-bottom: 1px solid rgba(var(--keen-accent-rgb), 0.14);
 }
 
 /* Prevent squared header/footer backgrounds from visually fighting the rounded card corners */
@@ -25,7 +25,7 @@
 }
 
 .kpi {
-  border-radius: 18px;
+  border-radius: 10px;
   border: 1px solid rgba(var(--keen-accent-rgb),0.22);
   background: rgba(255,255,255,0.78);
   box-shadow: 0 10px 22px rgba(20, 20, 40, 0.05);
@@ -37,7 +37,7 @@
 .badge-soft {
   background: rgba(var(--keen-accent-rgb),0.10);
   border: 1px solid rgba(var(--keen-accent-rgb),0.24);
-  color: var(--keen-purple-700);
+  color: var(--keen-accent-700);
   font-weight: 600;
 }
 
@@ -164,7 +164,7 @@ a.link-subtle:hover { color: rgba(31,31,42,0.95); text-decoration: underline; }
 pre.pretty {
   background: rgba(var(--keen-accent-rgb),0.06);
   border: 1px solid rgba(var(--keen-accent-rgb),0.18);
-  border-radius: 14px;
+  border-radius: 8px;
   padding: 12px;
   white-space: pre-wrap;
   overflow-wrap: anywhere;

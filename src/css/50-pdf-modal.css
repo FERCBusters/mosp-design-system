@@ -5,7 +5,7 @@
 .pdf-preview-grid { margin-top: 6px; }
 .pdf-preview-option {
   border: 1px solid rgba(var(--keen-accent-rgb), 0.20);
-  border-radius: 16px;
+  border-radius: 10px;
   padding: 12px;
   background: #fff;
   cursor: pointer;
@@ -25,7 +25,7 @@
 .pdf-preview-frame {
   position: relative;
   border: 1px solid rgba(var(--keen-accent-rgb), 0.16);
-  border-radius: 14px;
+  border-radius: 8px;
   height: 260px;
   background: #f8fafc;
   overflow: hidden;

@@ -33,7 +33,7 @@ body.keen-sticky-disabled .keen-sticky-topblock {
   border: none;
   background: transparent;
   padding: 6px 10px;
-  border-radius: 999px;
+  border-radius: 10px;
   color: var(--bs-secondary-color, #6c757d);
   font-weight: 600;
 }
@@ -85,7 +85,7 @@ body.keen-sticky-disabled .keen-sticky-topblock {
 /* Generic D3 visual containers */
 .graph-card {
   border: 1px solid rgba(0,0,0,0.08);
-  border-radius: 14px;
+  border-radius: 8px;
   overflow: hidden;
 }
 

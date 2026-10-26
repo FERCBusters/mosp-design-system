@@ -13,18 +13,18 @@ body.print-view .no-print {
 }
 
 .navbar-keen {
-  background: var(--keen-purple);
+  background: var(--keen-accent);
   box-shadow: 0 6px 18px rgba(var(--keen-accent-rgb),0.22);
-  z-index: 1050; /* stay above cards + dropdowns */
+  z-index: 1050; /* stay above cards + dropdowns */;
 }
 .navbar-keen .navbar-brand,
 .navbar-keen .nav-link,
 .navbar-keen .navbar-text { color: #fff !important; }
 .navbar-keen .nav-link { opacity: 0.95; }
-.navbar-keen .nav-link:hover { opacity: 1; text-decoration: none; background: rgba(255,255,255,0.16); border-radius: 10px; }
+.navbar-keen .nav-link:hover { opacity: 1; text-decoration: none; background: rgba(255,255,255,0.16); border-radius: 6px }
 .navbar-keen .nav-link.active {
   background: rgba(255,255,255,0.18);
-  border-radius: 10px;
+  border-radius: 6px;
 }
 .navbar-keen .form-control {
   border: 1px solid rgba(255,255,255,0.35);
@@ -38,7 +38,7 @@ body.print-view .no-print {
   width: auto;
   filter: none;
   background: #fff;
-  border-radius: 9px;
+  border-radius: 6px;
   padding: 3px;
   box-shadow: 0 1px 4px #0002;
   opacity: 1;
