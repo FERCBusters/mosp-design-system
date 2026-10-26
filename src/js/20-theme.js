@@ -7,13 +7,15 @@
 
 // Keep in sync with backend ALLOWED_THEMES if you use server-controlled themes.
 export const THEMES = [
-  {id: 'purple', name: 'Purple'},
+  {id: 'sand', name: 'Sand'},
+  {id: 'ink', name: 'Ink'},
   {id: 'ocean', name: 'Ocean'},
   {id: 'forest', name: 'Forest'},
   {id: 'sunset', name: 'Sunset'},
   {id: 'rose', name: 'Rose'},
   {id: 'slate', name: 'Slate'},
   {id: 'teal', name: 'Teal'},
+  {id: 'purple', name: 'Purple'},
 ];
 
 // Dark variants are persisted in the same account preference as their palette.
@@ -22,7 +24,7 @@ THEMES.push(...THEMES.map(theme => ({id: `${theme.id}-dark`, name: `${theme.name
 export function applyTheme(themeId, cfgOverrides = null) {
   const cfg = getUiConfig(cfgOverrides);
   const requested = String(themeId || '').trim();
-  const id = THEMES.some(theme => theme.id === requested) ? requested : 'purple';
+  const id = THEMES.some(theme => theme.id === requested) ? requested : 'sand';
   const dark = id.endsWith('-dark');
   document.documentElement.dataset.theme = dark ? id.slice(0, -5) : id;
   document.documentElement.dataset.colorMode = dark ? 'dark' : 'light';
@@ -36,10 +38,10 @@ export function applyTheme(themeId, cfgOverrides = null) {
 
 // Compatibility for callers of the former API; preferences should save a theme ID.
 export function applyColorMode(mode = 'light') {
-  const palette = document.documentElement.dataset.theme || 'purple';
+  const palette = document.documentElement.dataset.theme || 'sand';
   applyTheme(palette + (mode === 'dark' ? '-dark' : ''));
 }
 try {
   const cfg = getUiConfig();
-  applyTheme(localStorage.getItem(cfg.storage.themeKey) || 'purple', cfg);
-} catch { applyTheme('purple'); }
+  applyTheme(localStorage.getItem(cfg.storage.themeKey) || 'sand', cfg);
+} catch { applyTheme('sand'); }

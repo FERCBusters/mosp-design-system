@@ -10,14 +10,14 @@
 .admin-tab-nav {
   min-width: 240px;
   padding: 10px;
-  border-radius: 18px;
+  border-radius: 10px;
   background: rgba(255,255,255,0.70);
   border: 1px solid rgba(var(--keen-accent-rgb),0.16);
   box-shadow: 0 8px 18px rgba(20,20,40,0.04);
 }
 .admin-tab-nav .nav-link {
   text-align: left;
-  border-radius: 14px;
+  border-radius: 8px;
   padding: 10px 12px;
   font-weight: 650;
   color: var(--keen-ink);
@@ -30,12 +30,30 @@
   color: var(--keen-accent-700);
 }
 
+/* On small screens the rail becomes a collapsible two-column grid driven by
+   the page's layout toggle button and the .admin-nav-open class. */
+@media (max-width: 991px) {
+  .admin-tab-nav {
+    position: static;
+    flex-basis: auto;
+    width: 100%;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .admin-nav-label {
+    grid-column: 1/-1;
+  }
+  .admin-tab-nav:not(.admin-nav-open) {
+    display: none !important;
+  }
+}
+
 /* Wrapped multi-select (Special Permissions) */
 select.keen-multiselect-native-hidden { display: none; }
 
 .keen-multiselect-wrap {
   border: 1px solid rgba(31,31,42,0.16);
-  border-radius: 12px;
+  border-radius: 8px;
   background: rgba(255,255,255,0.92);
   padding: 6px;
   max-height: 270px;
@@ -47,7 +65,7 @@ select.keen-multiselect-native-hidden { display: none; }
   gap: 10px;
   align-items: flex-start;
   padding: 7px 8px;
-  border-radius: 10px;
+  border-radius: 6px;
   cursor: pointer;
   user-select: none;
 }
