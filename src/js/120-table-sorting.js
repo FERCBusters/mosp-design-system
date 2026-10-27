@@ -48,7 +48,12 @@ function parseSortValue(v) {
   if (!s) return {t: 'str', v: ''};
   const num = s.replace(/,/g, '');
   if (/^-?\d+(?:\.\d+)?$/.test(num)) return {t: 'num', v: parseFloat(num)};
-  const d = Date.parse(s);
+  // Visible DMY dates must not pass through the browser's US-style parser.
+  // Interpret the displayed wall-clock parts only; timestamp cells with a
+  // data-sort key continue to use their canonical key above.
+  const dmy = s.match(/^(\d{2})\/(\d{2})\/(\d{4})(?: (\d{2}):(\d{2}):(\d{2}))?$/);
+  const canonical = dmy ? `${dmy[3]}-${dmy[2]}-${dmy[1]}T${dmy[4] || '00'}:${dmy[5] || '00'}:${dmy[6] || '00'}Z` : s;
+  const d = Date.parse(canonical);
   if (!Number.isNaN(d) && /\d/.test(s)) return {t: 'date', v: d};
   return {t: 'str', v: s.toLowerCase()};
 }
