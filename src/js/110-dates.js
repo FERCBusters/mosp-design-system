@@ -28,13 +28,37 @@ function _dateFromIso(iso) {
 /**
  * Resolve the browser timezone used for timestamp formatting.
  */
+let _browserTimezone;
 function _effectiveTimezone() {
   const prefs = window.mospPreferences || {};
   const useLocal = !!prefs.use_local_timezone;
   if (useLocal) {
-    return (prefs.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || '').trim();
+    if (prefs.timezone) return String(prefs.timezone).trim();
+    _browserTimezone ??= Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    return _browserTimezone;
   }
   return (window.mospDefaultTimezone || '').trim();
+}
+
+// Retain only the most recently used timezone, including an invalid one. This
+// avoids constructing an Intl formatter per table row and bounds cache memory.
+let _timestampZone;
+let _timestampFormatter;
+function _formatterForTimestamp(tz) {
+  if (_timestampZone !== tz) {
+    _timestampZone = tz;
+    _timestampFormatter = null;
+    try {
+      _timestampFormatter = new Intl.DateTimeFormat('en-GB', {
+        timeZone: tz || undefined,
+        calendar: 'gregory', numberingSystem: 'latn',
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit',
+        hourCycle: 'h23',
+      });
+    } catch {}
+  }
+  return _timestampFormatter;
 }
 
 /**
@@ -47,17 +71,7 @@ export function fmtTs(iso) {
 
   const tz = _effectiveTimezone();
   try {
-    const fmt = new Intl.DateTimeFormat(undefined, {
-      timeZone: tz || undefined,
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false,
-      hourCycle: 'h23',
-    });
+    const fmt = _formatterForTimestamp(tz);
     const parts = fmt.formatToParts(d);
     const get = (t) => (parts.find((p) => p.type === t)?.value || '');
     const y = get('year');
@@ -66,11 +80,11 @@ export function fmtTs(iso) {
     const h = get('hour');
     const mi = get('minute');
     const s = get('second');
-    if (y && m && da && h && mi && s) return `${y}-${m}-${da} ${h}:${mi}:${s}`;
+    if (y && m && da && h && mi && s) return `${isoDateToDisplay(`${y}-${m}-${da}`)} ${h}:${mi}:${s}`;
   } catch {}
 
   const pad2 = (n) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
+  return `${isoDateToDisplay(`${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`)} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
 }
 
 /**
@@ -83,17 +97,7 @@ export function fmtTsFilename(iso) {
   const tz = _effectiveTimezone();
 
   try {
-    const fmt = new Intl.DateTimeFormat(undefined, {
-      timeZone: tz || undefined,
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false,
-      hourCycle: 'h23',
-    });
+    const fmt = _formatterForTimestamp(tz);
     const parts = fmt.formatToParts(d);
     const get = (t) => (parts.find((p) => p.type === t)?.value || '');
     const y = get('year'); const m = get('month'); const da = get('day');
