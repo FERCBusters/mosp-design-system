@@ -5,8 +5,13 @@
 // Table sorting (shared UX)
 // ---------------------------------------------------------------------------
 
+// Controls a header can hold, such as a select-all checkbox. They keep their own
+// click and key behaviour; the rest of the header still sorts.
+const SORT_HEADER_CONTROLS = 'a[href], button, input, label, select, summary, textarea';
+
 /**
  * Enable click-to-sort behaviour on tables marked with sortable headers.
+ * Mark a header with data-nosort when its column has nothing to sort by.
  */
 export function enableTableSorting(root = document) {
   const tables = Array.from(root.querySelectorAll('table[data-sortable], table.sortable'));
@@ -23,7 +28,12 @@ export function enableTableSorting(root = document) {
       th.setAttribute('role', 'button');
       th.setAttribute('aria-label', `Sort by ${th.textContent?.trim() || 'column'}`);
 
-      const handler = (ev) => { ev.preventDefault(); sortTableByColumn(table, idx); };
+      const handler = (ev) => {
+        const control = ev.target?.closest?.(SORT_HEADER_CONTROLS);
+        if (control && th.contains(control)) return;
+        ev.preventDefault();
+        sortTableByColumn(table, idx);
+      };
       th.addEventListener('click', handler);
       th.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') handler(ev); });
     });
