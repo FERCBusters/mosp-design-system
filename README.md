@@ -34,9 +34,11 @@ It assumes you're serving mostly-static HTML pages (no SPA) and using:
 
 - `dist/app.js` – bundled ESM module for consuming applications.
 - `dist/styles.css` – bundled themeable CSS for consuming applications.
+- `dist/theme-boot.js` – a classic script that applies the theme this browser last applied before the page first paints.
 - `src/js/*.js` – maintainable JavaScript source fragments, split by feature area.
 - `src/css/*.css` – maintainable CSS source fragments, split by feature area.
-- `scripts/build.mjs` – concatenates the ordered source fragments into `dist/app.js` and `dist/styles.css`.
+- `src/boot/theme-boot.js` – the part of `dist/theme-boot.js` that reads the saved theme.
+- `scripts/build.mjs` – concatenates the ordered source fragments into `dist/app.js` and `dist/styles.css`, and writes `dist/theme-boot.js` from `src/js/05-theme-attributes.js` and `src/boot/theme-boot.js`.
 
 The source fragments intentionally share one bundle scope and are concatenated in the explicit order listed in `scripts/build.mjs`. Edit the relevant file under `src/js/` or `src/css/`, then run `npm run build`; do not edit generated files under `dist/` directly.
 
@@ -47,10 +49,12 @@ The source fragments intentionally share one bundle scope and are concatenated i
 services/ui/public/vendor/mosp-design-system/
   app.js
   styles.css
+  theme-boot.js
 ```
 
-2) Include Bootstrap + icons
+2) Include the theme boot script and Bootstrap + icons. The boot script goes first in `<head>`, without `defer` or `async`: module scripts can run after the first paint, so without it a page can show the base palette briefly before the saved theme. With no saved theme the scripts apply Ink, the default. It only reads the saved theme; `applyTheme()` saves it.
 ```html
+<script src="/vendor/mosp-design-system/theme-boot.js"></script>
 <link href="/vendor/bootstrap/bootstrap.min.css" rel="stylesheet">
 <link href="/vendor/bootstrap-icons/bootstrap-icons.min.css" rel="stylesheet">
 <link rel="stylesheet" href="/vendor/mosp-design-system/styles.css">

@@ -104,7 +104,7 @@ const DEFAULT_CONFIG = {
     headerName: 'X-CSRF-Token',
   },
   storage: {
-    themeKey: 'keen_theme',
+    themeKey: MOSP_THEME_STORAGE_KEY,
     frameworkKey: 'keen_framework',
   },
   uiPreferences: {

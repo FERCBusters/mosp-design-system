@@ -41,4 +41,5 @@ jobs:
           set -eu
           npm run build
           node --check dist/app.js
+          node --check dist/theme-boot.js
           test -s dist/styles.css

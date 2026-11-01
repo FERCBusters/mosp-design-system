@@ -47,6 +47,9 @@
   background: rgba(var(--src-rgb),0.12);
   border: 1px solid rgba(var(--src-rgb),0.32);
   color: rgb(var(--src-rgb));
+  /* A light source colour would fall below 4.5:1 on the light canvases; keep
+     its hue and chroma and cap its lightness. Dark mode lifts it instead. */
+  color: oklch(from rgb(var(--src-rgb)) min(l, 0.45) c h);
   font-weight: 650;
 }
 .badge-source:hover {
@@ -121,8 +124,8 @@
 
 .small-muted { color: var(--keen-muted); font-size: 12px; }
 
-a.link-subtle { color: rgba(31,31,42,0.75); text-decoration: none; }
-a.link-subtle:hover { color: rgba(31,31,42,0.95); text-decoration: underline; }
+a.link-subtle { color: var(--keen-muted); text-decoration: none; }
+a.link-subtle:hover { color: var(--bs-body-color); text-decoration: underline; }
 
 /* Make Bootstrap primary buttons follow the active KEEN theme palette.
    Bootstrap's compiled .btn-primary ships with static button variables, so
@@ -159,6 +162,21 @@ a.link-subtle:hover { color: rgba(31,31,42,0.95); text-decoration: underline; }
 
 .btn-outline-primary:hover {
   border-color: rgba(var(--keen-accent-rgb),0.75);
+}
+
+/* Bootstrap's compiled grey falls below 4.5:1 on the tinted canvases and on
+   dark panels; the muted ink meets it on every theme. */
+.btn-outline-secondary {
+  --bs-btn-color: var(--keen-muted);
+  --bs-btn-border-color: var(--keen-muted);
+  --bs-btn-hover-color: var(--bs-body-bg);
+  --bs-btn-hover-bg: var(--keen-muted);
+  --bs-btn-hover-border-color: var(--keen-muted);
+  --bs-btn-active-color: var(--bs-body-bg);
+  --bs-btn-active-bg: var(--keen-muted);
+  --bs-btn-active-border-color: var(--keen-muted);
+  --bs-btn-disabled-color: var(--keen-muted);
+  --bs-btn-disabled-border-color: var(--keen-muted);
 }
 
 pre.pretty {

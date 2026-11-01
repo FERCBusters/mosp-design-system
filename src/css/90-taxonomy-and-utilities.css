@@ -179,7 +179,7 @@
 /* Dark appearance retains each theme's accent while replacing light surfaces.
    The default dark surfaces are the warm Sand family; Ink re-pins its cool
    family in the block beneath. */
-:root[data-bs-theme=dark]{color-scheme:dark;--keen-ink:#f2ede2;--keen-muted:#b6ae9e;--bs-body-color:#f2ede2;--bs-body-color-rgb:242,237,226;--bs-body-bg:#191611;--bs-body-bg-rgb:25,22,17;--bs-secondary-bg:#262117;--bs-tertiary-bg:#322c20;--bs-border-color:#4c4434;--bs-emphasis-color:#fff;--keen-accent-100:color-mix(in srgb,var(--keen-accent) 20%,#262117);--bs-link-color:color-mix(in srgb,var(--keen-accent) 55%,white);--bs-link-hover-color:color-mix(in srgb,var(--keen-accent) 35%,white)}
+:root[data-bs-theme=dark]{color-scheme:dark;--keen-ink:#f2ede2;--keen-muted:#b6ae9e;--bs-body-color:#f2ede2;--bs-body-color-rgb:242,237,226;--bs-body-bg:#191611;--bs-body-bg-rgb:25,22,17;--bs-secondary-bg:#262117;--bs-tertiary-bg:#322c20;--bs-border-color:#4c4434;--bs-emphasis-color:#fff;--keen-accent-100:color-mix(in srgb,var(--keen-accent) 20%,#262117);--bs-link-color:color-mix(in srgb,var(--keen-accent) 50%,white);--bs-link-hover-color:color-mix(in srgb,var(--keen-accent) 35%,white)}
 :root[data-bs-theme=dark][data-theme=ink]{--keen-ink:#edf0f6;--keen-muted:#b7bfce;--bs-body-color:#edf0f6;--bs-body-color-rgb:237,240,246;--bs-body-bg:#141820;--bs-body-bg-rgb:20,24,32;--bs-secondary-bg:#202631;--bs-tertiary-bg:#29313e;--bs-border-color:#465061;--keen-accent-100:color-mix(in srgb,var(--keen-accent) 20%,#202631)}
 :root[data-bs-theme=dark] body{background:var(--bs-body-bg);color:var(--bs-body-color)}
 :root[data-bs-theme=dark] :is(.card,.modal-content,.dropdown-menu,.list-group-item,.keen-multiselect-wrap){background:var(--bs-secondary-bg);color:var(--bs-body-color);border-color:var(--bs-border-color)}
@@ -205,7 +205,8 @@
   color:color-mix(in srgb,rgb(var(--keen-accent-rgb)) 55%,white);
   border-color:color-mix(in srgb,rgb(var(--keen-accent-rgb)) 38%,transparent);
 }
-:root[data-bs-theme=dark] .badge-source{color:color-mix(in srgb,rgb(var(--src-rgb)) 55%,white);border-color:color-mix(in srgb,rgb(var(--src-rgb)) 38%,transparent)}
+/* !important: a badge for a very light source colour carries dark inline text for light mode. */
+:root[data-bs-theme=dark] .badge-source{color:color-mix(in srgb,rgb(var(--src-rgb)) 55%,white)!important;border-color:color-mix(in srgb,rgb(var(--src-rgb)) 38%,transparent)!important}
 :root[data-bs-theme=dark] .badge-chip{color:var(--bs-body-color)}
 /* Tabs: bind the Bootstrap tab strip to theme tokens so the active tab sits
    on the canvas instead of punching a boxed strip through dark mode. */
@@ -219,7 +220,7 @@
 :root[data-bs-theme=dark] .nav-tabs{
   --bs-nav-tabs-link-active-color:color-mix(in srgb,rgb(var(--keen-accent-rgb)) 55%,white);
 }
-:root[data-bs-theme=dark] .btn-outline-primary{--bs-btn-color:var(--bs-link-color);--bs-btn-border-color:var(--bs-link-color)}
+:root[data-bs-theme=dark] .btn-outline-primary{--bs-btn-color:var(--bs-link-color);--bs-btn-border-color:var(--bs-link-color);--bs-btn-disabled-color:var(--bs-link-color);--bs-btn-disabled-border-color:var(--bs-link-color)}
 :root[data-bs-theme=dark] .navbar-keen .form-control{background:var(--bs-body-bg);color:var(--bs-body-color)}
 
 :root[data-bs-theme=dark] .table thead th{color:var(--bs-body-color)}

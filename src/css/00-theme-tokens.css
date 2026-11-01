@@ -4,7 +4,7 @@
 /* Keen UI – themeable (Bootstrap-friendly) */
 
 :root {
-  /* Accent palette (the navy accent stays the single voice; defaults to Sand) */
+  /* Accent palette (the navy accent stays the single voice of Sand and Ink) */
   --keen-accent: #004987;
   --keen-accent-700: #003768;
   --keen-accent-100: #f1e9d4;
@@ -40,7 +40,9 @@
 }
 
 /* Theme palettes (set on <html data-theme="...">). The base tokens are the
-   Sand family; palettes override what they change. */
+   Sand family, which the other palettes build on; palettes override what they
+   change. Ink is the default palette: the theme scripts set it when no theme
+   is saved. */
 :root[data-theme="ink"] {
   --keen-accent-100: #e4f2ff;
   --keen-ink: #1f1f2a;
