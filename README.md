@@ -17,7 +17,7 @@ It assumes you're serving mostly-static HTML pages (no SPA) and using:
 - Optional:
   - Framework selector (adds `?framework=<slug>` to nav links)
   - Global search box (optionally with datalist autocomplete)
-  - Notification bell + badge (polling + optional websocket)
+  - Notification bell + badge (polling + optional websocket), or a bell menu of several notification kinds with a count beside each
   - **Shortcuts** dropdown: "Save this view…" + list + delete
 
 ### Standard helpers (shared patterns)
@@ -121,6 +121,26 @@ Example for KEEN:
     }
   };
 </script>
+```
+
+   To list several kinds of notification, give the bell `items` instead of
+   `href`, `summaryEndpoint` and `countKey`. The bell then opens a menu with
+   each kind's count beside it, and its badge shows their total. `items` may
+   be a function of the signed-in user; with one item the bell is a link to it,
+   and with none it is hidden. `ws: true` marks the item the websocket's count
+   messages update:
+```js
+bell: {
+  enabled: true,
+  title: "Notifications",
+  items: (me) => [
+    {label: "Questions", href: "/questions.html", icon: "bi-chat-left-text",
+     summaryEndpoint: {admin: "/api/v1/admin/questions/summary", user: "/api/v1/me/questions/summary"},
+     countKey: {admin: "open_count", user: "unread_count"}, ws: true},
+    ...(me?.is_admin ? [{label: "Suggested rules", href: "/admin.html#rule-suggestions",
+      summaryEndpoint: "/api/v1/admin/rule-suggestions/summary", countKey: "open_count"}] : []),
+  ],
+}
 ```
 
 5) In your page modules, call `initNavbar()`:

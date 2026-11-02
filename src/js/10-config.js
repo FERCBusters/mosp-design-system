@@ -71,6 +71,13 @@ const DEFAULT_CONFIG = {
     summaryEndpoint: {admin: '/api/v1/admin/questions/summary', user: '/api/v1/me/questions/summary'},
     // May be string | function(me,cfg) | {admin, user}.
     countKey: {admin: 'open_count', user: 'unread_count'},
+    // Optional menu of notification kinds, replacing href/summaryEndpoint/countKey.
+    // A list (or function(me,cfg) returning one) of
+    // {label, href, icon?, summaryEndpoint?, countKey?, ws?}. Each item's count
+    // shows beside it and the bell shows their total; with one item the bell
+    // links to it, and with none it is hidden. ws: true marks the item the
+    // websocket's count messages update.
+    items: null,
     // WebSocket url (same-origin) for realtime, optional:
     wsUrl: '',
     // message handler: expects JSON messages with {type, count}

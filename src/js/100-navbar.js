@@ -236,14 +236,7 @@ export function renderNavbar(active = '', me = null, cfgOverrides = null) {
       </div>
   ` : '';
 
-  const bellHref = String(_resolveMaybeFn(_resolveRoleVariant(cfg.bell.href, me), me, cfg) || '#');
-  const bellTitle = String(_resolveMaybeFn(_resolveRoleVariant(cfg.bell.title, me), me, cfg) || 'Notifications');
-  const bellBlock = cfg.bell.enabled ? `
-      <a class="btn btn-sm btn-outline-light me-2 nav-question-bell" id="navBell" href="${esc(bellHref)}" title="${esc(bellTitle)}">
-        <i class="bi bi-bell" aria-hidden="true"></i>
-        <span class="badge rounded-pill text-bg-warning" id="navBellCount" style="display:none;"></span>
-      </a>
-  ` : '';
+  const bellBlock = cfg.bell.enabled ? _bellHtml(cfg, me) : '';
 
   // Optional extension point for app-specific controls (kept out of core).
   const extraHtml = String(_resolveMaybeFn(cfg.nav?.extraHtml, me, cfg) || '');
@@ -278,6 +271,68 @@ ${searchModalBlock}
 }
 
 /**
+ * The bell's notification kinds for this user, or null for the single-kind bell
+ * that href, title, summaryEndpoint and countKey describe.
+ */
+function _bellItems(cfg, me) {
+  const raw = _resolveMaybeFn(cfg.bell.items, me, cfg);
+  if (raw === null || raw === undefined) return null;
+  return (Array.isArray(raw) ? raw : []).filter((item) => item && item.label && item.href);
+}
+
+/**
+ * Each counted kind: what to fetch, and which key of the reply holds its count.
+ */
+function _bellEntries(cfg, me) {
+  const resolve = (v) => _resolveMaybeFn(_resolveRoleVariant(v, me), me, cfg);
+  const items = _bellItems(cfg, me);
+  return (items ?? [{summaryEndpoint: cfg.bell.summaryEndpoint, countKey: cfg.bell.countKey, ws: true}]).map((item) => ({
+    endpoint: String(resolve(item.summaryEndpoint) || '').trim(),
+    key: resolve(item.countKey) || 'count',
+    ws: !!item.ws,
+  }));
+}
+
+/**
+ * The bell: a link to one kind of notification, or a menu of several.
+ */
+function _bellHtml(cfg, me) {
+  const badge = (id) => `<span class="badge rounded-pill text-bg-warning" id="${id}" style="display:none;"></span>`;
+  const title = String(_resolveMaybeFn(_resolveRoleVariant(cfg.bell.title, me), me, cfg) || 'Notifications');
+  const items = _bellItems(cfg, me);
+  if (items && !items.length) return '';
+  if (!items || items.length === 1) {
+    const only = items?.[0];
+    const href = String(only ? only.href : (_resolveMaybeFn(_resolveRoleVariant(cfg.bell.href, me), me, cfg) || '#'));
+    const label = only ? String(only.label) : title;
+    return `
+      <a class="btn btn-sm btn-outline-light me-2 nav-question-bell" id="navBell" href="${esc(href)}" title="${esc(label)}" data-bell-label="${esc(label)}">
+        <i class="bi bi-bell" aria-hidden="true"></i>
+        <span class="visually-hidden">${esc(label)}</span>
+        ${badge('navBellCount')}
+      </a>`;
+  }
+  const entries = items.map((item, index) => {
+    const icon = String(item.icon || '').replace(/[^A-Za-z0-9_-]/g, '');
+    return `<li><a class="dropdown-item d-flex align-items-center gap-2" id="navBellItem${index}" href="${esc(item.href)}">${icon ? `<i class="bi ${icon}" aria-hidden="true"></i>` : ''}<span class="flex-grow-1">${esc(item.label)}</span>${badge(`navBellCount${index}`)}</a></li>`;
+  }).join('');
+  return `
+      <div class="dropdown me-2" id="navBellWrap">
+        <button class="btn btn-sm btn-outline-light nav-question-bell" id="navBell" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="${esc(title)}" title="${esc(title)}" data-bell-label="${esc(title)}">
+          <i class="bi bi-bell" aria-hidden="true"></i>
+          ${badge('navBellCount')}
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end" id="navBellMenu">${entries}</ul>
+      </div>`;
+}
+
+function _showBadge(el, n) {
+  if (!el) return;
+  el.style.display = n > 0 ? '' : 'none';
+  el.textContent = n > 0 ? String(n) : '';
+}
+
+/**
  * Initialise notification bell counts, polling, and optional websocket updates.
  */
 async function _initBell(cfg, me) {
@@ -287,27 +342,31 @@ async function _initBell(cfg, me) {
   const bellEl = document.getElementById('navBell');
   if (!countEl || !bellEl) return;
 
-  const setBellCount = (n) => {
-    const v = Number(n || 0);
-    if (v > 0) {
-      countEl.style.display = '';
-      countEl.textContent = String(v);
-    } else {
-      countEl.style.display = 'none';
-      countEl.textContent = '';
+  const entries = _bellEntries(cfg, me);
+  const counts = entries.map(() => 0);
+  const menu = entries.length > 1;
+  const label = bellEl.getAttribute('data-bell-label') || 'Notifications';
+  // The bell shows the total; a menu also shows each kind's count beside it.
+  const setCount = (index, n) => {
+    counts[index] = Math.max(0, Number(n || 0)) || 0;
+    const total = counts.reduce((sum, value) => sum + value, 0);
+    _showBadge(countEl, total);
+    if (menu) {
+      _showBadge(document.getElementById(`navBellCount${index}`), counts[index]);
+      bellEl.setAttribute('aria-label', total ? `${label}: ${total} waiting` : label);
     }
   };
 
   const refresh = async () => {
-    const ep = String(_resolveMaybeFn(_resolveRoleVariant(cfg.bell.summaryEndpoint, me), me, cfg) || '').trim();
-    if (!ep) return;
-    try {
-      const data = await apiGet(ep, cfg);
-      const key = _resolveMaybeFn(_resolveRoleVariant(cfg.bell.countKey, me), me, cfg) || 'count';
-      setBellCount(data?.[key] ?? data?.count ?? 0);
-    } catch {
-      // ignore
-    }
+    await Promise.all(entries.map(async (entry, index) => {
+      if (!entry.endpoint) return;
+      try {
+        const data = await apiGet(entry.endpoint, cfg);
+        setCount(index, data?.[entry.key] ?? data?.count ?? 0);
+      } catch {
+        // ignore
+      }
+    }));
   };
 
   // Expose for pages that change notification state.
@@ -330,8 +389,9 @@ async function _initBell(cfg, me) {
       ws.onmessage = (ev) => {
         try {
           const msg = JSON.parse(ev.data || '{}');
-          if (msg?.type === cfg.bell.wsType && Object.prototype.hasOwnProperty.call(msg, 'count')) {
-            setBellCount(msg.count || 0);
+          const index = entries.findIndex((entry) => entry.ws);
+          if (index >= 0 && msg?.type === cfg.bell.wsType && Object.prototype.hasOwnProperty.call(msg, 'count')) {
+            setCount(index, msg.count || 0);
           }
         } catch {/* ignore */}
       };
