@@ -20,6 +20,16 @@ export function resolveSavedUrl(rawName) {
   return _savedByNameLower.get(lower) || '';
 }
 
+/**
+ * Resolve a saved name to the address the navbar search opens, with the active framework.
+ * A saved URL passes the check the shortcuts menu applies before it links to one; '' means
+ * no usable saved URL.
+ */
+function _savedSearchTarget(rawName, cfg) {
+  const saved = safeExternalHref(resolveSavedUrl(rawName));
+  return saved ? withFramework(saved, getCurrentFramework('', cfg), cfg) : '';
+}
+
 // KEEN back-compat naming.
 /**
  * Backward-compatible alias for resolving saved search names.

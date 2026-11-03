@@ -71,22 +71,26 @@ export function getCurrentFramework(fallback = '', cfgOverrides = null) {
 
 /**
  * Add the active framework query parameter to an application URL when framework support is enabled.
+ *
+ * A same-origin URL, relative ones included, comes back as its path, query and fragment, with
+ * the framework when one is active. That path keeps one leading slash: the URL parser resolves
+ * dot segments, so "/.//host" has the path "//host", which a browser reads as another host.
+ * Another HTTP(S) URL comes back in full with its query unchanged, since the framework belongs to
+ * this application. A URL with any other scheme, such as javascript: or data:, comes back as ''.
  */
 export function withFramework(url, framework = null, cfgOverrides = null) {
   const cfg = getUiConfig(cfgOverrides);
-  if (!cfg.framework.enabled) return String(url || '');
-
-  const fw = _normFramework(framework || getCurrentFramework('', cfg));
-  if (!fw) return String(url || '');
+  const raw = String(url || '');
+  const fw = cfg.framework.enabled ? _normFramework(framework || getCurrentFramework('', cfg)) : '';
 
   try {
-    const u = new URL(String(url || ''), window.location.origin);
-    u.searchParams.set(cfg.framework.queryParam || 'framework', fw);
-    if (u.origin === window.location.origin) return `${u.pathname}${u.search}${u.hash || ''}`;
-    return u.toString();
+    const u = new URL(raw, window.location.origin);
+    if (u.protocol !== 'http:' && u.protocol !== 'https:') return '';
+    if (u.origin !== window.location.origin) return u.href;
+    if (fw) u.searchParams.set(cfg.framework.queryParam || 'framework', fw);
+    return `/${u.pathname.replace(/^\/+/, '')}${u.search}${u.hash}`;
   } catch {
-    const raw = String(url || '');
-    if (!raw) return '';
+    if (!fw || !raw) return raw;
     const key = cfg.framework.queryParam || 'framework';
     const hasQ = raw.includes('?');
     const sep = hasQ ? '&' : '?';
@@ -226,12 +230,13 @@ async function _initFrameworkSelector(cfg) {
   sel.addEventListener('change', () => {
     const next = _normFramework(sel.value);
     if (next) _storeFramework(next, cfg);
-    // Update URL param and refresh.
+    // Update URL param and refresh. The full address stays on this origin even when the
+    // path begins with "//", which a path on its own would make another host.
     const key = cfg.framework.queryParam || 'framework';
-    const p = new URLSearchParams(location.search);
-    if (next) p.set(key, next);
-    else p.delete(key);
-    const nextUrl = p.toString() ? `${location.pathname}?${p.toString()}` : location.pathname;
-    location.href = nextUrl;
+    const u = new URL(location.href);
+    if (next) u.searchParams.set(key, next);
+    else u.searchParams.delete(key);
+    u.hash = '';
+    location.href = u.href;
   });
 }

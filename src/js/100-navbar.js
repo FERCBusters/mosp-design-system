@@ -529,10 +529,9 @@ export async function initNavbar(cfgOverrides = null) {
         }
 
         if (cfg.search.resolveNamesToUrls && cfg.search.datalistEndpoint) {
-          const saved = resolveSavedUrl(q);
+          const saved = _savedSearchTarget(q, cfg);
           if (saved) {
-            const jump = cfg.framework.enabled ? withFramework(saved, getCurrentFramework('', cfg), cfg) : saved;
-            location.href = jump;
+            location.href = saved;
             return;
           }
         }
