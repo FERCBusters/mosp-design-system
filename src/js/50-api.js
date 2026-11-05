@@ -88,7 +88,11 @@ export function errorText(err) {
   if (raw.startsWith('{') || raw.startsWith('[')) {
     try {
       const parsed = JSON.parse(raw);
-      raw = parsed?.detail || parsed?.error || parsed?.message || '';
+      const detail = parsed?.detail;
+      // A failed request validation lists each problem with its own message.
+      raw = Array.isArray(detail)
+        ? detail.map((problem) => problem?.msg).filter(Boolean).join('; ')
+        : detail || parsed?.error || parsed?.message || '';
     } catch {
       // Keep the original text; a non-JSON document may still be readable.
     }

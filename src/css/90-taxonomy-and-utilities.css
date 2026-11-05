@@ -202,7 +202,7 @@
 /* Accent-tinted chips and badges: keep the wash but lift ink/labels so the
    count numbers and labels stay readable on dark panels. */
 :root[data-bs-theme=dark] :is(.badge-soft,.badge-source,.badge-chip){
-  color:color-mix(in srgb,rgb(var(--keen-accent-rgb)) 55%,white);
+  color:color-mix(in srgb,rgb(var(--keen-accent-rgb)) 50%,white);
   border-color:color-mix(in srgb,rgb(var(--keen-accent-rgb)) 38%,transparent);
 }
 /* !important: a badge for a very light source colour carries dark inline text for light mode. */
@@ -218,7 +218,7 @@
   --bs-nav-tabs-link-hover-border-color:rgba(var(--keen-accent-rgb),0.10) rgba(var(--keen-accent-rgb),0.10) rgba(var(--keen-accent-rgb),0.18);
 }
 :root[data-bs-theme=dark] .nav-tabs{
-  --bs-nav-tabs-link-active-color:color-mix(in srgb,rgb(var(--keen-accent-rgb)) 55%,white);
+  --bs-nav-tabs-link-active-color:color-mix(in srgb,rgb(var(--keen-accent-rgb)) 50%,white);
 }
 :root[data-bs-theme=dark] .btn-outline-primary{--bs-btn-color:var(--bs-link-color);--bs-btn-border-color:var(--bs-link-color);--bs-btn-disabled-color:var(--bs-link-color);--bs-btn-disabled-border-color:var(--bs-link-color)}
 :root[data-bs-theme=dark] .navbar-keen .form-control{background:var(--bs-body-bg);color:var(--bs-body-color)}

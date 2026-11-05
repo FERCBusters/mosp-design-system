@@ -14,6 +14,7 @@ It assumes you're serving mostly-static HTML pages (no SPA) and using:
 - Fixed **horizontal** Bootstrap navbar (`navbar-keen`)
 - Consistent brand slot (icon + name)
 - Consistent buttons, cards, tables, muted text (via `styles.css`)
+- Nine theme palettes (Ink, the default, Sand, Ocean, Forest, Sunset, Rose, Slate, Teal and Purple), each with a dark variant. Text coloured by the theme tokens clears WCAG AA contrast, 4.5:1, on the surfaces the tokens paint; `tests/theme-contrast.test.mjs` checks every palette in both modes.
 - Optional:
   - Framework selector (adds `?framework=<slug>` to nav links)
   - Global search box (optionally with datalist autocomplete)

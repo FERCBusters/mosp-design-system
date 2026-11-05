@@ -19,6 +19,20 @@ test('errorText prefers the readable message behind API errors', async (t) => {
   );
   // JSON bodies from server errors surface their detail field.
   assert.equal(api.errorText(new Error('{"detail":"Validation failed"}')), 'Validation failed');
+  // A failed validation lists its problems, which read as their messages.
+  const invalid = {
+    detail: [
+      { type: 'string_too_long', loc: ['body', 'name'], msg: 'String should have at most 128 characters' },
+      { type: 'missing', loc: ['body', 'source'], msg: 'Field required' },
+      { type: 'unknown', loc: ['body'] },
+    ],
+  };
+  assert.equal(
+    api.errorText(new Error(JSON.stringify(invalid))),
+    'String should have at most 128 characters; Field required',
+  );
+  // A list without messages falls back to the generic sentence.
+  assert.match(api.errorText(new Error('{"detail":[{"loc":["body"]}]}')), /Something went wrong/);
   // Anything without a usable message falls back to the generic sentence.
   assert.match(api.errorText(undefined), /Something went wrong/);
   // Very long blow-ups stay bounded and readable.
