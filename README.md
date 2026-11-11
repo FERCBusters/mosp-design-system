@@ -95,6 +95,9 @@ Example for KEEN:
     ],
     framework: {
       enabled: true,
+      // Optional, as for links: leave the picker out unless the (mapped)
+      // user has these flags, e.g. an installation feature that is on.
+      requireAll: ["feature_frameworks"],
       endpoint: "/api/v1/frameworks",
       queryParam: "framework",
       default: "ISO27001:2022"

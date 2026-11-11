@@ -31,6 +31,21 @@ function _featureAllowed(me, cfgFragment) {
   return _hasAny(me, cfgFragment?.requireAny) && _hasAll(me, cfgFragment?.requireAll);
 }
 
+/**
+ * The navbar configuration for one user: the framework picker and the bell
+ * take the same `requireAny` / `requireAll` flags as links, so an application
+ * can leave either out for users, or installations, that should not see it.
+ */
+function _navConfigFor(cfg, me) {
+  const out = { ...cfg };
+  for (const part of ['framework', 'bell']) {
+    if (out[part]?.enabled && !_featureAllowed(me, out[part])) {
+      out[part] = { ...out[part], enabled: false };
+    }
+  }
+  return out;
+}
+
 function _meCacheKey(cfg) {
   const app = String(cfg.appId || 'app').replace(/[^A-Za-z0-9_.:-]/g, '_');
   const ep = String(cfg.auth?.meEndpoint || '').replace(/[^A-Za-z0-9_.:/?-]/g, '_');
@@ -160,7 +175,7 @@ function _initNavDensity(mount, onAfterApply = null) {
  * Render the shared MOSP navbar for the current user and configuration.
  */
 export function renderNavbar(active = '', me = null, cfgOverrides = null) {
-  const cfg = getUiConfig(cfgOverrides);
+  const cfg = _navConfigFor(getUiConfig(cfgOverrides), me);
 
   const links = (cfg.links || []).filter((lnk) => _featureAllowed(me, lnk));
 
@@ -416,7 +431,7 @@ async function _initBell(cfg, me) {
  * Fetch the current user, render the navbar, and initialise shared page behaviours.
  */
 export async function initNavbar(cfgOverrides = null) {
-  const cfg = getUiConfig(cfgOverrides);
+  let cfg = getUiConfig(cfgOverrides);
 
   const mount = document.getElementById('navbar');
   if (!mount) return null;
@@ -442,6 +457,8 @@ export async function initNavbar(cfgOverrides = null) {
   }
 
   window.mospMe = me;
+  // From here on the picker and bell follow the user's flags.
+  cfg = _navConfigFor(cfg, me);
   if (cfg.appId === 'keen') window.keenMe = me;
 
   // Preferences: allow backend to set theme
