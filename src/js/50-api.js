@@ -19,9 +19,18 @@ function readCookie(name) {
 
 /**
  * Read the configured CSRF token from cookies.
+ *
+ * A server that sets Secure cookies without a Domain attribute can name the
+ * cookie with the `__Host-` prefix. A browser accepts that name only from this
+ * host over HTTPS, so a site under the same parent domain can neither set nor
+ * shadow it, and it is read first. The configured name alone serves a server
+ * that sets no prefix, such as one reached over plain HTTP. A configured name
+ * that already carries a cookie prefix is read as it is.
  */
 function csrfToken(cfg) {
-  return readCookie(cfg.csrf.cookieName);
+  const name = cfg.csrf.cookieName;
+  if (/^__(?:Host|Secure)-/i.test(name)) return readCookie(name);
+  return readCookie(`__Host-${name}`) || readCookie(name);
 }
 
 /**

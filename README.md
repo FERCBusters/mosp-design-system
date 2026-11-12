@@ -22,7 +22,7 @@ It assumes you're serving mostly-static HTML pages (no SPA) and using:
   - **Shortcuts** dropdown: "Save this view…" + list + delete
 
 ### Standard helpers (shared patterns)
-- CSRF header handling
+- CSRF header handling (see "CSRF cookie" below)
 - `apiGet/apiPost/apiPatch/apiPut/apiDelete/apiPostForm`
 - querystring helpers (`qs/qbool/qint/setQuery`)
 - timestamp helpers (`fmtTs`, filename-safe `fmtTsFilename`)
@@ -167,6 +167,21 @@ In each app's UI build directory:
 ### Option B — git submodule
 - Add the UI kit as a submodule into each repo (e.g. `vendor/mosp-design-system/`)
 - Copy `dist/*` into `public/vendor/mosp-design-system/` during build/deploy.
+
+### CSRF cookie
+
+The API helpers that change data (`apiPost`, `apiPatch`, `apiPut`, `apiDelete`,
+`apiPostForm`, and `apiRequest` when it sends a change) repeat the CSRF
+cookie's value in the `csrf.headerName` header. `csrf.cookieName` is the
+cookie's name without a prefix.
+
+A server that sets Secure cookies without a `Domain` attribute can name the
+cookie `__Host-<cookieName>`. A browser accepts that name only from the page's
+own host over HTTPS, so a site under the same parent domain can neither set nor
+shadow it. The helpers read `__Host-<cookieName>` first and `<cookieName>`
+otherwise, so one bundle serves an installation behind HTTPS and one reached
+over plain HTTP. A `cookieName` that already begins with `__Host-` or
+`__Secure-` is read as it is.
 
 ### Navbar startup data
 

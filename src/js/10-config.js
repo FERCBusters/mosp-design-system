@@ -107,6 +107,8 @@ const DEFAULT_CONFIG = {
     meCacheMs: 60000,
   },
   csrf: {
+    // The cookie's name without a prefix. Where the server sets it as
+    // `__Host-<cookieName>`, that cookie is read first (see csrfToken).
     cookieName: 'keen_csrf',
     headerName: 'X-CSRF-Token',
   },
